@@ -13,19 +13,18 @@ st.set_page_config(
 )
 
 # ==========================================
-# SAFE & BEAUTIFUL CUSTOM CSS
+# SAFE & BEAUTIFUL CUSTOM CSS (ROMAN ENGLISH FRIENDLY)
 # ==========================================
-# We use carefully scoped CSS to avoid breaking Streamlit's root layout or causing white screens.
 st.markdown(
     """
     <style>
-    /* Gradient Background for the App */
+    /* Premium Gradient Background for the entire App */
     .stApp {
         background: linear-gradient(135deg, #fff0f5 0%, #ffe4ec 50%, #ffd6e8 100%) !important;
         font-family: 'Outfit', sans-serif;
     }
 
-    /* Elegant Custom Card styling */
+    /* Elegant Custom Glassmorphism Card styling */
     .premium-card {
         background: rgba(255, 255, 255, 0.65);
         border: 1px solid rgba(255, 105, 180, 0.3);
@@ -126,7 +125,7 @@ if "welcome_step" not in st.session_state:
 if "heart_clicks" not in st.session_state:
     st.session_state.heart_clicks = 0
 if "current_apology_msg" not in st.session_state:
-    st.session_state.current_apology_msg = "Tap target button below to read my feelings... ❤️"
+    st.session_state.current_apology_msg = "Niche diye gaye button par click karein aur mere dil ki baat padhein... ❤️"
 if "surprise_opened" not in st.session_state:
     st.session_state.surprise_opened = False
 if "forgive_status" not in st.session_state:
@@ -135,9 +134,8 @@ if "current_memory_index" not in st.session_state:
     st.session_state.current_memory_index = 0
 
 # ==========================================
-# DATA CONFIGURATIONS
+# 60+ EMOTIONAL APOLOGY MESSAGES (ROMAN ENGLISH)
 # ==========================================
-# 60+ Emotional Apology Messages in Roman English
 apology_messages = [
     "Mujhe tumhari bohat yaad aati hai. Please maaf kar do na... 🥺",
     "Please naraz mat raho, tumhare bina mera din ekdum adhura hai.",
@@ -259,7 +257,7 @@ else:
 
 st.markdown("<hr style='border: 1px solid rgba(255,105,180,0.15);'>", unsafe_allow_html=True)
 
-# --- 3. IMPORTANT CARS SECTION ---
+# --- 3. IMPORTANT CARDS SECTION ---
 st.markdown("### ❤️ Tum Mere Liye Bohat Important Ho")
 
 important_cards = [
@@ -316,7 +314,7 @@ st.markdown("<hr style='border: 1px solid rgba(255,105,180,0.15);'>", unsafe_all
 
 # --- 5. INTERACTIVE HEARTBEAT APOLOGY SECTION ---
 st.markdown("### 💖 Tap The Heart")
-st.write("Aapki narazgi door karne ke liye maine 60+ emotional messages likhe hain. Heart par click karein!")
+st.write("Aapki narazgi door karne ke liye maine 60+ emotional messages/apologies likhi hain. Heart par click karein!")
 
 # Large pulsing heart display
 st.markdown(
@@ -331,13 +329,13 @@ st.markdown(
 if st.button("💖 Click to Beat the Heart 💖"):
     st.session_state.heart_clicks += 1
     st.session_state.current_apology_msg = random.choice(apology_messages)
-    st.balloons() # Interactive effect
+    st.balloons() # Interactive balloon effect
 
 # Dynamic feedback message
 st.markdown(
     f"""
     <div style="background: rgba(255, 255, 255, 0.8); border-left: 5px solid #ff6fa5; padding: 15px; border-radius: 12px; margin-top: 10px; text-align: center;">
-        <span style="font-size: 11px; font-weight: bold; text-transform: uppercase; color: #ff6fa5; tracking-widest: 1px;">Message #{st.session_state.heart_clicks}</span>
+        <span style="font-size: 11px; font-weight: bold; text-transform: uppercase; color: #ff6fa5; tracking-widest: 1px;">Apology #{st.session_state.heart_clicks}</span>
         <p style="font-size: 16px; font-weight: bold; color: #4a1525; font-style: italic; margin-top: 5px; line-height: 1.5;">
             "{st.session_state.current_apology_msg}"
         </p>
@@ -348,7 +346,7 @@ st.markdown(
 
 st.markdown("<hr style='border: 1px solid rgba(255,105,180,0.15);'>", unsafe_allow_html=True)
 
-# --- 6. APOLOGY LETTER (Typewriter progresive release) ---
+# --- 6. APOLOGY LETTER (Typewriter progressive release) ---
 st.markdown("### 📝 Dil se Sorry Letter")
 
 letter_lines = [
@@ -374,7 +372,7 @@ if show_letter:
             st.markdown(f"<p style='text-align: center; font-weight: bold; font-size: 16px; color: #d6336c;'>{line}</p>", unsafe_allow_html=True)
         else:
             st.write(line)
-        time.sleep(0.01) # Soft animation feel
+        time.sleep(0.01) # Soft progressive typing feel
 
 st.markdown("<hr style='border: 1px solid rgba(255,105,180,0.15);'>", unsafe_allow_html=True)
 
