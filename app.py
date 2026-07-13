@@ -97,12 +97,6 @@ st.markdown(
         box-shadow: 0 8px 20px rgba(255, 105, 165, 0.25);
     }
 
-    /* Make sure main block content sits above the floating decor */
-    div[data-testid="stAppViewContainer"] > .main {
-        position: relative;
-        z-index: 3;
-    }
-
     /* Heart pulse used on interactive page */
     .heart-pulse {
         display: inline-block;
@@ -120,7 +114,7 @@ st.markdown(
         transform: translate(-50%, -50%);
         font-size: 32vw;
         opacity: 0.06;
-        z-index: 0;
+        z-index: -1;
         pointer-events: none;
         animation: watermarkPulse 4s ease-in-out infinite;
         user-select: none;
@@ -135,7 +129,7 @@ st.markdown(
         height: 100%;
         overflow: hidden;
         pointer-events: none;
-        z-index: 1;
+        z-index: -1;
     }
     .floating-item {
         position: absolute;
