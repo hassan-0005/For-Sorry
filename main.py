@@ -378,9 +378,6 @@ if "view" in query_params and query_params["view"] == "hassan":
             </style>
             <div class="lock-card">
                 <h2 style="color: #9E0031; font-family: 'Playfair Display', serif; margin-bottom: 8px;">🔒 Hassan's Secret Lock</h2>
-                <p style="color: #4a001a; font-weight: 500; font-size: 15px; margin-bottom: 25px;">
-                    Apna secret passcode enter karein Ruhii ke activity logs aur clicks dekhne ke liye! 😉
-                </p>
             </div>
             """,
             unsafe_allow_html=True
