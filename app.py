@@ -23,29 +23,32 @@ st.set_page_config(
 st.markdown(
     """
     <style>
-    /* ---------- Pink Theme ---------- */
+    /* ---------- Pink Theme (forced, so it can't be overridden by dark mode) ---------- */
+    html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
+        background: linear-gradient(180deg, #fff0f5 0%, #ffe4ec 50%, #ffd6e8 100%) !important;
+        color-scheme: light !important;
+    }
     .stApp {
-        background: linear-gradient(180deg, #fff0f5 0%, #ffe4ec 50%, #ffd6e8 100%);
         position: relative;
         overflow-x: hidden;
     }
 
     section[data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #ffd6e8 0%, #ffb3d1 100%);
+        background: linear-gradient(180deg, #ffd6e8 0%, #ffb3d1 100%) !important;
     }
 
     h1, h2, h3, h4, h5, h6 {
         color: #d6336c !important;
     }
 
-    p, li, span, label {
-        color: #7a2e4d;
+    p, li, span, label, div, .stMarkdown {
+        color: #7a2e4d !important;
     }
 
     /* Buttons */
-    div.stButton > button {
+    div.stButton > button, div.stButton > button * {
         background: linear-gradient(135deg, #ff6fa5, #ff9ec4);
-        color: white;
+        color: white !important;
         border: none;
         border-radius: 30px;
         padding: 10px 18px;
@@ -106,37 +109,40 @@ st.markdown(
         width: 100%;
     }
 
-    /* Big soft watermark heart pulsing behind content */
+    /* Big soft watermark heart, sits inline at the top of each page (no fixed positioning) */
+    .watermark-wrap {
+        position: relative;
+        width: 100%;
+        height: 70px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        margin-bottom: 4px;
+    }
     .watermark-heart {
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        font-size: 32vw;
-        opacity: 0.06;
-        z-index: -1;
-        pointer-events: none;
-        animation: watermarkPulse 4s ease-in-out infinite;
+        font-size: 48px;
+        opacity: 0.35;
+        animation: watermarkPulse 2.2s ease-in-out infinite;
         user-select: none;
     }
 
-    /* Floating hearts & sprinkles container */
+    /* Floating hearts & sprinkles: a bounded, self-contained strip (normal document flow) */
     .floating-decor {
-        position: fixed;
-        top: 0;
-        left: 0;
+        position: relative;
         width: 100%;
-        height: 100%;
+        height: 90px;
         overflow: hidden;
-        pointer-events: none;
-        z-index: -1;
+        border-radius: 18px;
+        background: rgba(255, 182, 213, 0.18);
+        margin-bottom: 14px;
     }
     .floating-item {
         position: absolute;
-        bottom: -10%;
+        bottom: -30px;
         opacity: 0;
         animation-name: floatUp;
-        animation-timing-function: ease-in;
+        animation-timing-function: ease-in-out;
         animation-iteration-count: infinite;
         will-change: transform, opacity;
     }
@@ -187,15 +193,15 @@ st.markdown(
         50%      { transform: translateY(-10px); }
     }
     @keyframes watermarkPulse {
-        0%, 100% { transform: translate(-50%, -50%) scale(1);   opacity: 0.06; }
-        50%      { transform: translate(-50%, -50%) scale(1.08); opacity: 0.1; }
+        0%, 100% { transform: scale(1);   opacity: 0.3; }
+        50%      { transform: scale(1.15); opacity: 0.55; }
     }
     @keyframes floatUp {
         0%   { transform: translateY(0) translateX(0) rotate(0deg);   opacity: 0; }
-        10%  { opacity: 0.85; }
-        50%  { transform: translateY(-55vh) translateX(15px) rotate(180deg); opacity: 0.9; }
-        90%  { opacity: 0.4; }
-        100% { transform: translateY(-110vh) translateX(-15px) rotate(360deg); opacity: 0; }
+        15%  { opacity: 0.95; }
+        50%  { transform: translateY(-70px) translateX(10px) rotate(180deg); opacity: 1; }
+        85%  { opacity: 0.5; }
+        100% { transform: translateY(-140px) translateX(-10px) rotate(360deg); opacity: 0; }
     }
 
     /* ---------- Per-page animation classes ---------- */
@@ -238,15 +244,15 @@ WATERMARK_HEARTS = {
 }
 
 
-def render_floating_decor(emojis, count=18):
-    """Render a full-screen layer of rising, rotating hearts/sprinkles."""
+def render_floating_decor(emojis, count=14):
+    """Render a bounded strip (normal document flow) of rising, rotating hearts/sprinkles."""
     items = []
     for _ in range(count):
         emoji = random.choice(emojis)
-        left = random.uniform(0, 96)
-        delay = random.uniform(0, 6)
-        duration = random.uniform(6, 12)
-        size = random.uniform(14, 30)
+        left = random.uniform(2, 94)
+        delay = random.uniform(0, 4)
+        duration = random.uniform(3.5, 6.5)
+        size = random.uniform(16, 28)
         items.append(
             f'<span class="floating-item" style="left:{left:.1f}%; '
             f'font-size:{size:.0f}px; animation-delay:{delay:.2f}s; '
@@ -257,7 +263,16 @@ def render_floating_decor(emojis, count=18):
 
 
 def render_watermark(emoji):
-    st.markdown(f'<div class="watermark-heart">{emoji}</div>', unsafe_allow_html=True)
+    st.markdown(
+        f'<div class="watermark-wrap"><span class="watermark-heart">{emoji}</span></div>',
+        unsafe_allow_html=True
+    )
+
+
+def render_page_decor(page_name):
+    """Convenience: draws the watermark + floating strip for a given page, in normal flow."""
+    render_watermark(WATERMARK_HEARTS[page_name])
+    render_floating_decor(PAGE_DECOR[page_name], count=14)
 
 
 # --- Define 40+ Heartfelt Apology Messages ---
@@ -341,10 +356,6 @@ if selected_page != st.session_state.current_page:
     st.session_state.current_page = selected_page
     st.rerun()
 
-# --- Render page-specific floating decor + watermark heart (every page) ---
-render_watermark(WATERMARK_HEARTS[st.session_state.current_page])
-render_floating_decor(PAGE_DECOR[st.session_state.current_page], count=18)
-
 # --- HEADER SECTION ---
 st.markdown("<h4 style='text-align: center; color: #d6336c;'>Besties Forever 💗</h4>", unsafe_allow_html=True)
 st.write("---")
@@ -354,6 +365,7 @@ st.write("---")
 # ==========================================
 if st.session_state.current_page == "1. Welcome 🌸":
     st.markdown('<div class="anim-welcome">', unsafe_allow_html=True)
+    render_page_decor(st.session_state.current_page)
 
     st.header("Dear Ruhii 💗")
 
@@ -383,6 +395,7 @@ if st.session_state.current_page == "1. Welcome 🌸":
 # ==========================================
 elif st.session_state.current_page == "2. Why You Matter 🤍":
     st.markdown('<div class="anim-matter">', unsafe_allow_html=True)
+    render_page_decor(st.session_state.current_page)
 
     st.header("Why You Matter 🤍")
 
@@ -418,6 +431,7 @@ elif st.session_state.current_page == "2. Why You Matter 🤍":
 # ==========================================
 elif st.session_state.current_page == "3. Beautiful Memories ✨":
     st.markdown('<div class="anim-memories">', unsafe_allow_html=True)
+    render_page_decor(st.session_state.current_page)
 
     st.header("Our Beautiful Memories ✨")
     st.caption("Here is a quick look at the timeline of our friendship. Click each phase to read.")
@@ -470,6 +484,7 @@ elif st.session_state.current_page == "3. Beautiful Memories ✨":
 # ==========================================
 elif st.session_state.current_page == "4. Reasons ❤️":
     st.markdown('<div class="anim-reasons">', unsafe_allow_html=True)
+    render_page_decor(st.session_state.current_page)
 
     st.header("Reasons Why You Matter ❤️")
     st.write("Five reasons why our friendship is the most valuable connection to me.")
@@ -527,6 +542,7 @@ elif st.session_state.current_page == "4. Reasons ❤️":
 # ==========================================
 elif st.session_state.current_page == "5. Promises 🤝":
     st.markdown('<div class="anim-promises">', unsafe_allow_html=True)
+    render_page_decor(st.session_state.current_page)
 
     st.header("My Promises To You 🤝")
     st.write("These are my pledges to ensure we never have to face a rough patch like this again.")
@@ -573,6 +589,7 @@ elif st.session_state.current_page == "5. Promises 🤝":
 # ==========================================
 elif st.session_state.current_page == "6. Interactive Heart 💖":
     st.markdown('<div class="anim-heart">', unsafe_allow_html=True)
+    render_page_decor(st.session_state.current_page)
 
     st.header("Interactive Heart 💖")
     st.markdown('<div class="heart-pulse">💗</div>', unsafe_allow_html=True)
@@ -612,6 +629,7 @@ elif st.session_state.current_page == "6. Interactive Heart 💖":
 # ==========================================
 elif st.session_state.current_page == "7. Letter ✉️":
     st.markdown('<div class="anim-letter">', unsafe_allow_html=True)
+    render_page_decor(st.session_state.current_page)
 
     st.header("Dear Ruhii ✉️")
 
@@ -653,6 +671,7 @@ elif st.session_state.current_page == "7. Letter ✉️":
 # ==========================================
 elif st.session_state.current_page == "8. Final Surprise 🎁":
     st.markdown('<div class="anim-surprise">', unsafe_allow_html=True)
+    render_page_decor(st.session_state.current_page)
 
     st.header("One Last Surprise 🎁")
     st.markdown('<div class="floaty" style="text-align:center; font-size:2.5rem;">🎁💗🎁</div>', unsafe_allow_html=True)
