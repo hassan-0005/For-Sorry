@@ -324,6 +324,58 @@ memories = [
 # SECRET ADMIN PANEL FOR HASSAN'S EYES ONLY
 query_params = st.query_params
 if "view" in query_params and query_params["view"] == "hassan":
+    # Initialize session state variable for passcode verification
+    if "admin_verified" not in st.session_state:
+        st.session_state.admin_verified = False
+
+    # Passcode Modal / Lock Screen
+    if not st.session_state.admin_verified:
+        st.markdown(
+            """
+            <style>
+            .lock-card {
+                background: rgba(255, 255, 255, 0.85);
+                border: 2px solid rgba(214, 51, 108, 0.4);
+                border-radius: 24px;
+                padding: 35px;
+                margin: 40px auto;
+                max-width: 480px;
+                box-shadow: 0 10px 30px rgba(214, 51, 108, 0.2);
+                text-align: center;
+                backdrop-filter: blur(10px);
+            }
+            </style>
+            <div class="lock-card">
+                <h2 style="color: #9E0031; font-family: 'Playfair Display', serif; margin-bottom: 8px;">🔒 Hassan's Secret Lock</h2>
+                <p style="color: #4a001a; font-weight: 500; font-size: 15px; margin-bottom: 25px;">
+                    Apna secret passcode enter karein Ruhii ke activity logs aur clicks dekhne ke liye! 😉
+                </p>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+        
+        # Center the password field using columns
+        col_p1, col_p2, col_p3 = st.columns([1, 2, 1])
+        with col_p2:
+            passcode_input = st.text_input("🔑 Enter Secret Passcode:", type="password", key="hassan_secret_pass_key")
+            if st.button("Unlock Dashboard 🔓", use_container_width=True):
+                if passcode_input.lower().strip() in ["hassan", "dearruhii", "dearruhii ❤️"]:
+                    st.session_state.admin_verified = True
+                    st.success("Passcode durust hai! Loading dashboard...")
+                    time.sleep(1)
+                    st.rerun()
+                else:
+                    st.error("Ghalat passcode! Dobara koshish karein. 🥺")
+            
+            st.write("")
+            if st.button("Back to Website ⬅️", use_container_width=True):
+                st.query_params.clear()
+                st.rerun()
+        
+        st.stop() # Prevent showing logs until logged in
+
+    # If verified, continue to load the Admin Dashboard
     st.markdown(
         """
         <style>
@@ -465,7 +517,19 @@ if "view" in query_params and query_params["view"] == "hassan":
             st.rerun()
             
     st.write("---")
-    st.caption("Admin view exit karne ke liye URL se '?view=hassan' hata dein aur page refresh karein.")
+    col_out1, col_out2 = st.columns(2)
+    with col_out1:
+        if st.button("🔓 Logout Admin", use_container_width=True):
+            st.session_state.admin_verified = False
+            st.query_params.clear()
+            st.success("Successfully logged out!")
+            time.sleep(1)
+            st.rerun()
+    with col_out2:
+        if st.button("Back to Website ⬅️", use_container_width=True):
+            st.query_params.clear()
+            st.rerun()
+            
     st.stop() # Stop further execution for admin
 
 # 1. STEP 0: WELCOME SCREEN
@@ -678,7 +742,10 @@ elif st.session_state.current_step == 4:
     st.markdown('<div class="romantic-card" style="border: 2px dashed #d6336c; background: #fff5f8;">', unsafe_allow_html=True)
     for line in letter_lines:
         if "Dear Ruhii" in line or "— Hassan" in line or "❤️" == line.strip():
-            st.markdown(f"<p style='text-align: center; font-weight: 800; font-size: 18px; color: #d6336c; margin: 10px 0;'>{line}</p>", unsafe_allow_html=True)
+            if "— Hassan" in line:
+                st.markdown(f"<p style='text-align: center; font-weight: 800; font-size: 18px; margin: 10px 0;'><a href='?view=hassan' target='_self' style='color: #d6336c !important; text-decoration: none !important;'>— Hassan</a></p>", unsafe_allow_html=True)
+            else:
+                st.markdown(f"<p style='text-align: center; font-weight: 800; font-size: 18px; color: #d6336c; margin: 10px 0;'>{line}</p>", unsafe_allow_html=True)
         else:
             st.markdown(f"<p style='color: #4a001a; font-size: 15px; font-weight: 500; line-height: 1.6; text-align: center;'>{line}</p>", unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
@@ -794,7 +861,11 @@ st.markdown(
     <div style="text-align: center; color: #581845; padding-bottom: 25px;">
         <p style="font-size: 13px; margin-bottom: 2px; font-weight: 600;">Made with Love, Respect & Hope.</p>
         <p style="font-size: 14px; font-weight: bold; margin-bottom: 0;">Forever Your Best Friend,</p>
-        <h3 style="color: #d6336c; margin-top: 2px; font-family: 'Playfair Display', serif;">Hassan ❤️</h3>
+        <div style="margin-top: 8px;">
+            <a href="?view=hassan" target="_self" style="color: #d6336c !important; text-decoration: none !important; font-family: 'Playfair Display', serif; font-size: 1.6rem; font-weight: bold; display: inline-block; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                Hassan ❤️
+            </a>
+        </div>
     </div>
     """,
     unsafe_allow_html=True
