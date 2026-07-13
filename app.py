@@ -23,32 +23,29 @@ st.set_page_config(
 st.markdown(
     """
     <style>
-    /* ---------- Pink Theme (forced, so it can't be overridden by dark mode) ---------- */
-    html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
-        background: linear-gradient(180deg, #fff0f5 0%, #ffe4ec 50%, #ffd6e8 100%) !important;
-        color-scheme: light !important;
-    }
+    /* ---------- Pink Theme ---------- */
     .stApp {
+        background: linear-gradient(180deg, #fff0f5 0%, #ffe4ec 50%, #ffd6e8 100%);
         position: relative;
         overflow-x: hidden;
     }
 
     section[data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #ffd6e8 0%, #ffb3d1 100%) !important;
+        background: linear-gradient(180deg, #ffd6e8 0%, #ffb3d1 100%);
     }
 
     h1, h2, h3, h4, h5, h6 {
         color: #d6336c !important;
     }
 
-    p, li, span, label, div, .stMarkdown {
-        color: #7a2e4d !important;
+    p, li, label {
+        color: #7a2e4d;
     }
 
     /* Buttons */
-    div.stButton > button, div.stButton > button * {
+    div.stButton > button {
         background: linear-gradient(135deg, #ff6fa5, #ff9ec4);
-        color: white !important;
+        color: white;
         border: none;
         border-radius: 30px;
         padding: 10px 18px;
