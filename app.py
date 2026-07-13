@@ -1,448 +1,722 @@
+# -*- coding: utf-8 -*-
+"""
+Dear Ruhii ❤️ - A Heartfelt Apology Website
+Author: Hassan
+Technology: Streamlit (Pure Python)
+Theme: Pink 💗 with per-page entrance animations + floating hearts & sprinkles
+"""
+
 import streamlit as st
 import random
-import time
 
-# ==========================================
-# PAGE CONFIGURATION
-# ==========================================
+# --- Page Configuration ---
 st.set_page_config(
     page_title="Dear Ruhii ❤️",
-    page_icon="💖",
+    page_icon="💗",
     layout="centered",
     initial_sidebar_state="collapsed"
 )
 
-# ==========================================
-# SAFE & BEAUTIFUL CUSTOM CSS (ROMAN ENGLISH FRIENDLY)
-# ==========================================
+# =========================================================
+# GLOBAL PINK THEME + ANIMATION CSS
+# =========================================================
 st.markdown(
     """
     <style>
-    /* Premium Gradient Background for the entire App */
+    /* ---------- Pink Theme ---------- */
     .stApp {
-        background: linear-gradient(135deg, #fff0f5 0%, #ffe4ec 50%, #ffd6e8 100%) !important;
-        font-family: 'Outfit', sans-serif;
+        background: linear-gradient(180deg, #fff0f5 0%, #ffe4ec 50%, #ffd6e8 100%);
+        position: relative;
+        overflow-x: hidden;
     }
 
-    /* Elegant Custom Glassmorphism Card styling */
-    .premium-card {
-        background: rgba(255, 255, 255, 0.65);
-        border: 1px solid rgba(255, 105, 180, 0.3);
-        border-radius: 20px;
-        padding: 24px;
-        margin: 15px 0;
-        box-shadow: 0 8px 32px 0 rgba(255, 105, 180, 0.15);
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
-        transition: transform 0.3s ease;
-    }
-    .premium-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 12px 40px 0 rgba(255, 105, 180, 0.25);
+    section[data-testid="stSidebar"] {
+        background: linear-gradient(180deg, #ffd6e8 0%, #ffb3d1 100%);
     }
 
-    /* Custom Titles & Headings */
-    .main-title {
-        font-family: 'Playfair Display', serif;
+    h1, h2, h3, h4, h5, h6 {
         color: #d6336c !important;
-        text-align: center;
-        font-size: 2.5rem;
-        font-weight: 700;
-        margin-bottom: 5px;
-        text-shadow: 2px 2px 4px rgba(255, 105, 180, 0.2);
-    }
-    .subtitle {
-        color: #9b5de5 !important;
-        text-align: center;
-        font-style: italic;
-        font-size: 1.1rem;
-        margin-bottom: 25px;
     }
 
-    /* Smooth Custom Buttons */
+    p, li, label {
+        color: #7a2e4d;
+    }
+
+    /* Buttons */
     div.stButton > button {
-        background: linear-gradient(135deg, #ff6fa5, #ff9ec4) !important;
-        color: white !important;
-        border: none !important;
-        border-radius: 30px !important;
-        padding: 12px 24px !important;
-        font-size: 16px !important;
-        font-weight: 600 !important;
-        box-shadow: 0 4px 15px rgba(255, 111, 165, 0.3) !important;
-        transition: all 0.3s ease !important;
-        width: 100% !important;
+        background: linear-gradient(135deg, #ff6fa5, #ff9ec4);
+        color: white;
+        border: none;
+        border-radius: 30px;
+        padding: 10px 18px;
+        font-weight: 600;
+        box-shadow: 0 4px 12px rgba(255, 105, 165, 0.4);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        position: relative;
+        z-index: 5;
     }
     div.stButton > button:hover {
-        transform: scale(1.03) !important;
-        box-shadow: 0 6px 22px rgba(255, 111, 165, 0.5) !important;
+        transform: scale(1.06) translateY(-3px);
+        box-shadow: 0 6px 20px rgba(255, 105, 165, 0.6);
+        color: white;
     }
     div.stButton > button:active {
-        transform: scale(0.97) !important;
+        transform: scale(0.96);
     }
 
-    /* Heartbeat Pulse Animation */
-    .heart-container {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        padding: 20px 0;
+    /* Alerts (info/success/warning boxes) */
+    div[data-testid="stAlert"] {
+        border-radius: 16px;
+        border-left: 6px solid #ff6fa5 !important;
+        animation: pulseGlow 2.5s ease-in-out infinite;
+        position: relative;
+        z-index: 5;
     }
-    .heart-icon {
-        font-size: 5rem;
-        animation: heartbeat 1.4s infinite ease-in-out;
-        cursor: pointer;
+
+    /* Expanders */
+    details {
+        background: #fff0f6;
+        border-radius: 12px;
+        border: 1px solid #ffc2dc !important;
+        margin-bottom: 8px;
+        position: relative;
+        z-index: 5;
+    }
+
+    /* Containers with border (Reasons page cards) */
+    div[data-testid="stVerticalBlockBorderWrapper"] {
+        border-radius: 16px !important;
+        border: 1px solid #ffc2dc !important;
+        background: #fff5f9;
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+        position: relative;
+        z-index: 5;
+    }
+    div[data-testid="stVerticalBlockBorderWrapper"]:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 20px rgba(255, 105, 165, 0.25);
+    }
+
+    /* Heart pulse used on interactive page */
+    .heart-pulse {
+        display: inline-block;
+        animation: heartbeat 1.3s ease-in-out infinite;
+        font-size: 3rem;
+        text-align: center;
+        width: 100%;
+    }
+
+    /* Big soft watermark heart, sits inline at the top of each page (no fixed positioning) */
+    .watermark-wrap {
+        position: relative;
+        width: 100%;
+        height: 70px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        margin-bottom: 4px;
+    }
+    .watermark-heart {
+        font-size: 48px;
+        opacity: 0.35;
+        animation: watermarkPulse 2.2s ease-in-out infinite;
         user-select: none;
     }
-    @keyframes heartbeat {
-        0%, 100% { transform: scale(1); filter: drop-shadow(0 0 5px rgba(214, 51, 108, 0.3)); }
-        25% { transform: scale(1.15); filter: drop-shadow(0 0 15px rgba(214, 51, 108, 0.6)); }
-        40% { transform: scale(1.05); filter: drop-shadow(0 0 8px rgba(214, 51, 108, 0.4)); }
-        60% { transform: scale(1.15); filter: drop-shadow(0 0 15px rgba(214, 51, 108, 0.6)); }
+
+    /* Floating hearts & sprinkles: a bounded, self-contained strip (normal document flow) */
+    .floating-decor {
+        position: relative;
+        width: 100%;
+        height: 90px;
+        overflow: hidden;
+        border-radius: 18px;
+        background: rgba(255, 182, 213, 0.18);
+        margin-bottom: 14px;
+    }
+    .floating-item {
+        position: absolute;
+        bottom: -30px;
+        opacity: 0;
+        animation-name: floatUp;
+        animation-timing-function: ease-in-out;
+        animation-iteration-count: infinite;
+        will-change: transform, opacity;
     }
 
-    /* Floating particles simulation banner */
-    .particles-banner {
-        text-align: center;
-        font-size: 1.5rem;
-        letter-spacing: 12px;
-        margin: 15px 0;
-        animation: floatParticles 4s ease-in-out infinite;
+    /* ---------- Keyframes ---------- */
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to   { opacity: 1; }
     }
-    @keyframes floatParticles {
-        0%, 100% { transform: translateY(0); }
-        50% { transform: translateY(-8px); }
+    @keyframes slideInLeft {
+        from { opacity: 0; transform: translateX(-60px); }
+        to   { opacity: 1; transform: translateX(0); }
     }
+    @keyframes slideInRight {
+        from { opacity: 0; transform: translateX(60px); }
+        to   { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes slideInUp {
+        from { opacity: 0; transform: translateY(40px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes zoomIn {
+        from { opacity: 0; transform: scale(0.85); }
+        to   { opacity: 1; transform: scale(1); }
+    }
+    @keyframes bounceIn {
+        0%   { opacity: 0; transform: scale(0.6); }
+        60%  { opacity: 1; transform: scale(1.08); }
+        80%  { transform: scale(0.96); }
+        100% { transform: scale(1); }
+    }
+    @keyframes rotateIn {
+        from { opacity: 0; transform: rotate(-8deg) scale(0.9); }
+        to   { opacity: 1; transform: rotate(0deg) scale(1); }
+    }
+    @keyframes pulseGlow {
+        0%, 100% { box-shadow: 0 0 6px rgba(255,105,165,0.15); }
+        50%      { box-shadow: 0 0 18px rgba(255,105,165,0.45); }
+    }
+    @keyframes heartbeat {
+        0%, 100% { transform: scale(1); }
+        25%      { transform: scale(1.2); }
+        40%      { transform: scale(1); }
+        60%      { transform: scale(1.15); }
+    }
+    @keyframes floatUpDown {
+        0%, 100% { transform: translateY(0px); }
+        50%      { transform: translateY(-10px); }
+    }
+    @keyframes watermarkPulse {
+        0%, 100% { transform: scale(1);   opacity: 0.3; }
+        50%      { transform: scale(1.15); opacity: 0.55; }
+    }
+    @keyframes floatUp {
+        0%   { transform: translateY(0) translateX(0) rotate(0deg);   opacity: 0; }
+        15%  { opacity: 0.95; }
+        50%  { transform: translateY(-70px) translateX(10px) rotate(180deg); opacity: 1; }
+        85%  { opacity: 0.5; }
+        100% { transform: translateY(-140px) translateX(-10px) rotate(360deg); opacity: 0; }
+    }
+
+    /* ---------- Per-page animation classes ---------- */
+    .anim-welcome   { animation: fadeIn 1.1s ease-out; }
+    .anim-matter    { animation: slideInLeft 0.9s ease-out; }
+    .anim-memories  { animation: slideInRight 0.9s ease-out; }
+    .anim-reasons   { animation: zoomIn 0.9s ease-out; }
+    .anim-promises  { animation: slideInUp 0.9s ease-out; }
+    .anim-heart     { animation: bounceIn 1s ease-out; }
+    .anim-letter    { animation: rotateIn 1s ease-out; }
+    .anim-surprise  { animation: bounceIn 1.1s ease-out; }
+
+    .floaty { animation: floatUpDown 3s ease-in-out infinite; }
+
     </style>
     """,
     unsafe_allow_html=True
 )
 
-# ==========================================
-# INITIALIZE SESSION STATES
-# ==========================================
-if "welcome_step" not in st.session_state:
-    st.session_state.welcome_step = 0
-if "heart_clicks" not in st.session_state:
-    st.session_state.heart_clicks = 0
-if "current_apology_msg" not in st.session_state:
-    st.session_state.current_apology_msg = "Niche diye gaye button par click karein aur mere dil ki baat padhein... ❤️"
-if "surprise_opened" not in st.session_state:
-    st.session_state.surprise_opened = False
-if "forgive_status" not in st.session_state:
-    st.session_state.forgive_status = None
-if "current_memory_index" not in st.session_state:
-    st.session_state.current_memory_index = 0
+# =========================================================
+# DECORATION HELPERS: floating hearts/sprinkles + watermark
+# =========================================================
 
-# ==========================================
-# 60+ EMOTIONAL APOLOGY MESSAGES (ROMAN ENGLISH)
-# ==========================================
-apology_messages = [
-    "Mujhe tumhari bohat yaad aati hai. Please maaf kar do na... 🥺",
-    "Please naraz mat raho, tumhare bina mera din ekdum adhura hai.",
-    "Main waqai sorry hoon, mera maqsad tumhara dil dukhana bilkul nahi tha.",
-    "Tumhari friendship meri life mein sabse keemti aur pyaari cheez hai. ❤️",
-    "I really miss my best friend. Please dubaara pehle jaise ban jao.",
-    "Tumse baat kiye bina din adhoora aur udaas lagta hai.",
-    "Galti meri hi thi, please mujhe maaf kar do, Ruhii.",
-    "Main kabhi tumhara dil dukhane ka soch bhi nahi sakta.",
-    "Hassan hamesha tumhara best friend rahega, chahe kuch bhi ho jaye.",
-    "Tumhari smile se meri duniya khushnuma ho jati hai. 🌸",
-    "Please hamari dosti ko ek aur pyara sa mauka do.",
-    "Main tumse dosti khona nahi chahta, tum bohot special ho.",
-    "Tum mere liye sabse zyada important ho, Ruhii.",
-    "Meri nadaniyo aur ghaltiyo ko bacha samajh kar maaf kar do.",
-    "Aapka gussa bilkul sahi hai, par hamari dosti usse bhi badi hai.",
-    "Tumhare bina meri hansi aur khushi dono hi adhuri hain.",
-    "Main waada karta hoon, aage se aisi galti kabhi nahi hogi. 🤝",
-    "Dosti mein choti-moti nok-jhonk to hoti hai, par dooriyan nahi honi chahiye.",
-    "Tum meri sabse pyari aur samajhdar dost ho.",
-    "Har ek lamha mujhe hamari dosti ki yaad dilata hai.",
-    "Main apne bure behavior ke liye dil se sharminda hoon. 😔",
-    "Tumse baat karke mera mood kitna bhi kharab ho, automatic theek ho jata hai.",
-    "Please meri ek choti si galti ke liye mujhse door mat jao.",
-    "I promise, I will always listen to you and value your thoughts.",
-    "Tumhari dosti mere liye upar wale ka ek sabse haseen gift hai.",
-    "Main tumhara hamesha har khushi aur gham mein sath dunga.",
-    "Maafi maangne se koi chota nahi hota, aur tumhare aage main hamesha jhuk sakta hoon.",
-    "Ruhii, please ek baar sweet si smile de do na! 😊",
-    "Main hamari dosti ko dubaara pehle jaisi mazboot banana chahta hoon.",
-    "Tumhare gusse se mera dil andar se bilkul toot jata hai.",
-    "Tumhe hurt karna meri life ki sabse badi galti thi.",
-    "I really cherish our bond, more than words can ever describe.",
-    "Tumhare bina poori duniya ekdum sunsaan lagti hai.",
-    "Mere dil mein tumhare liye hamesha be-hisaab respect rahegi.",
-    "Chalo gile-shikwe door karte hain aur dubaara dosti ka hath milate hain.",
-    "Mujhe maaf kar do, main tumhare chehre par gussa nahi sirf smile dekhna chahta hoon.",
-    "Tumhare sath kiye gaye mazaak aur sharartein bohot yaad aati hain.",
-    "Dosti ka matlab hi maaf karna hai, aur tumhara dil to bohot bada hai. 💖",
-    "Mujhe pata hai main perfect nahi hoon, par tumhare liye behtar dost zaroor banunga.",
-    "Our friendship is too precious to lose over a small misunderstanding.",
-    "Please smile, aapki khushi se hi meri khushi judi hai.",
-    "Main dil se sharminda hoon aur sach mein maafi maangta hoon.",
-    "Aap mere liye hamesha sabse upar rahungi, Ruhii.",
-    "I will do whatever it takes to fix our friendship.",
-    "Maaf kar ke meri dunya ko phir se rangeen bana do.",
-    "I miss our endless night chats, sharing random thoughts and theories.",
-    "You are my absolute favorite human to talk to, Ruhii.",
-    "Galtiyan sabse hoti hain, par dosti ka rishta naseeb walo ko milta hai.",
-    "Main tumhari har baat sunne aur samajhne ko ready hoon, please baat karo.",
-    "Your friendship means the absolute world to me.",
-    "Main apni har galti ko sudhaarne ke liye 100% ready hoon.",
-    "Tumhari dosti meri life ki sabse beautiful memory hai jo main kabhi nahi khona chahta.",
-    "Without you, my days are just long, silent, and empty.",
-    "Please don't shut me out, let's talk and resolve everything.",
-    "Let's be best friends again, with double the love and respect! ❤️",
-    "You are the glitter and sparkle in my otherwise ordinary life.",
-    "I value you more than any words can ever try to express.",
-    "Maaf kar do na please, ab bohot gussa ho gaya, ab maan bhi jao. 🥺",
-    "Mujhe tumhari haseen aur pyari si hansi dubaara sunni hai.",
-    "Hassan is truly, deeply, and unconditionally sorry, Ruhii. ❤️",
-    "You are the best best-friend anyone could ever wish for in their life.",
-    "I will always protect your feelings and respect your personal choices.",
-    "Humari dosti sabse khoobsurat hai, please isse aise tutne mat do."
-]
+# Emoji sets tailored to each page for extra variety
+PAGE_DECOR = {
+    "1. Welcome 🌸":            ["🌸", "💗", "💕"],
+    "2. Why You Matter 🤍":     ["🤍", "💫", "✨"],
+    "3. Beautiful Memories ✨": ["✨", "🌟", "💖"],
+    "4. Reasons ❤️":            ["❤️", "💐", "💗"],
+    "5. Promises 🤝":           ["🤝", "🌸", "💫"],
+    "6. Interactive Heart 💖":  ["💖", "💓", "💗"],
+    "7. Letter ✉️":             ["✉️", "💌", "🌸"],
+    "8. Final Surprise 🎁":     ["🎁", "🎉", "💗"],
+}
 
-# Memories Data List
-memories = [
-    {"icon": "✨", "title": "Pehli baar baat hui", "desc": "Wo din jab humari pehli conversation shuru hui thi. Ekdum anjaan thhe hum dono, par us din ke baad se meri life kitni haseen ho gayi!"},
-    {"icon": "😂", "title": "Hansi Mazak", "desc": "Bematlab ke jokes par ghanto tak hasna, pagal jaisi baatein karna, aur har pal ko dher saari masti se bhar dena."},
-    {"icon": "📸", "title": "Beautiful Memories", "desc": "Humari saari pyari baatein aur lamhe jo hamesha mere dil ke sabse kareeb rahenge. Har ek chat bohot anmol hai."},
-    {"icon": "☕", "title": "Random Conversations", "desc": "Raat ke 2 baje wali baatein bina kisi darr ke... jahan humne duniya jahan ki baatein share ki. Wo sukoon behad pyaara hai."},
-    {"icon": "🤍", "title": "Har mushkil waqt", "desc": "Jab bhi life ne thoda pareshan kiya, ek dusre ka dhyan rakhna aur humesha support ke liye khade rehna."},
-    {"icon": "🌹", "title": "Friendship Forever", "desc": "Ye dosti ek aisi blessing hai jo main kabhi khona nahi chahta. Chahe jo bhi ho, tum hamesha meri sabse pyari dost rahungi."}
-]
+WATERMARK_HEARTS = {
+    "1. Welcome 🌸": "💗", "2. Why You Matter 🤍": "🤍", "3. Beautiful Memories ✨": "💖",
+    "4. Reasons ❤️": "❤️", "5. Promises 🤝": "💗", "6. Interactive Heart 💖": "💓",
+    "7. Letter ✉️": "💌", "8. Final Surprise 🎁": "🎁",
+}
 
-# ==========================================
-# APP LAYOUT (MOBILE FIRST DESIGN)
-# ==========================================
 
-# Particles animation simulation (Floating Hearts, Stars, Flowers)
-st.markdown('<div class="particles-banner">❤️ ✨ 🌸 ⭐ 💖 🌸 ✨ ❤️</div>', unsafe_allow_html=True)
+def render_floating_decor(emojis, count=14):
+    """Render a bounded strip (normal document flow) of rising, rotating hearts/sprinkles."""
+    items = []
+    for _ in range(count):
+        emoji = random.choice(emojis)
+        left = random.uniform(2, 94)
+        delay = random.uniform(0, 4)
+        duration = random.uniform(3.5, 6.5)
+        size = random.uniform(16, 28)
+        items.append(
+            f'<span class="floating-item" style="left:{left:.1f}%; '
+            f'font-size:{size:.0f}px; animation-delay:{delay:.2f}s; '
+            f'animation-duration:{duration:.2f}s;">{emoji}</span>'
+        )
+    html = f'<div class="floating-decor">{"".join(items)}</div>'
+    st.markdown(html, unsafe_allow_html=True)
 
-# Main Title & Subtitle
-st.markdown('<h1 class="main-title">💖 Dear Ruhii</h1>', unsafe_allow_html=True)
-st.markdown('<p class="subtitle">"Ek choti si website... Sirf tumhare liye ❤️"</p>', unsafe_allow_html=True)
 
-# --- 1. BACKGROUND PIANO MUSIC ---
-st.markdown("### 🎵 Background Music")
-music_url = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" # Soft, nostalgic piano track
-st.audio(music_url, format="audio/mp3", loop=True)
-st.caption("Music on karne ke liye upar play button press karein! 🎧")
-
-st.markdown("<hr style='border: 1px solid rgba(255,105,180,0.15);'>", unsafe_allow_html=True)
-
-# --- 2. ANIMATED WELCOME SCREEN (Line by line) ---
-st.markdown("### 👋 Message from Hassan")
-
-welcome_sentences = [
-    "Hi Ruhii 👋",
-    "Aaj main tumse sirf ek baat kehna chahta hoon...",
-    "Please poori website dekhna...",
-    "Ye sirf website nahi...",
-    "Mere dil ki baat hai ❤️"
-]
-
-# Render sentences progressively based on state
-for i in range(st.session_state.welcome_step + 1):
-    if i < len(welcome_sentences):
-        st.info(welcome_sentences[i])
-
-# Button to advance the welcome steps
-if st.session_state.welcome_step < len(welcome_sentences) - 1:
-    if st.button("Aage Padhein... 💌"):
-        st.session_state.welcome_step += 1
-        st.rerun()
-else:
-    st.success("Thank you so much poori baat sunne ke liye. Let's explore more down below! 👇")
-
-st.markdown("<hr style='border: 1px solid rgba(255,105,180,0.15);'>", unsafe_allow_html=True)
-
-# --- 3. IMPORTANT CARDS SECTION ---
-st.markdown("### ❤️ Tum Mere Liye Bohat Important Ho")
-
-important_cards = [
-    {"icon": "❤️", "title": "Tum meri best friend ho", "desc": "Har ek baat share karna, bematlab hasna, tumse zyada comfortable aur trustworthy friend meri life mein koi nahi hai."},
-    {"icon": "😊", "title": "Tumhari smile bohat achi lagti hai", "desc": "Jab tum khush hoti ho, to mujhe lagta hai sab sahi hai. Tumhari smile meri sabse favorite khushi hai."},
-    {"icon": "🌸", "title": "Tumhare bina sab adhura lagta hai", "desc": "Din chahe kitna bhi busy ho, tumhare sath bina baat kiye poora din khali khali sa beetta hai."},
-    {"icon": "💖", "title": "Mujhe hamari friendship pyari hai", "desc": "Main is dosti ko hamesha dil se laga kar rakhunga. Is rishte ka meri life mein koi badal nahi hai."}
-]
-
-# Grid of cards using premium box styles
-for card in important_cards:
+def render_watermark(emoji):
     st.markdown(
-        f"""
-        <div class="premium-card">
-            <h4 style="color: #d6336c; margin-top: 0; display: flex; align-items: center; gap: 8px;">
-                <span>{card['icon']}</span> {card['title']}
-            </h4>
-            <p style="color: #7a2e4d; font-size: 14px; margin: 0; line-height: 1.5;">{card['desc']}</p>
-        </div>
-        """,
+        f'<div class="watermark-wrap"><span class="watermark-heart">{emoji}</span></div>',
         unsafe_allow_html=True
     )
 
-st.markdown("<hr style='border: 1px solid rgba(255,105,180,0.15);'>", unsafe_allow_html=True)
 
-# --- 4. MEMORY CAROUSEL ---
-st.markdown("### 📸 Hamari Yaadein")
-current_mem = memories[st.session_state.current_memory_index]
+def render_page_decor(page_name):
+    """Convenience: draws the watermark + floating strip for a given page, in normal flow."""
+    render_watermark(WATERMARK_HEARTS[page_name])
+    render_floating_decor(PAGE_DECOR[page_name], count=14)
 
-# Beautiful Card for Memories
-st.markdown(
-    f"""
-    <div class="premium-card" style="text-align: center; background: rgba(255, 230, 240, 0.85); border: 2px solid #ff6fa5;">
-        <span style="font-size: 3.5rem; display: block; margin-bottom: 10px;">{current_mem['icon']}</span>
-        <h3 style="color: #d6336c; margin-top: 0; font-family: 'Playfair Display', serif;">{current_mem['title']}</h3>
-        <p style="color: #4a1525; font-size: 15px; line-height: 1.6; margin: 0 10px;">"{current_mem['desc']}"</p>
-    </div>
-    """,
-    unsafe_allow_html=True
-)
 
-# Navigation Buttons
-col_prev, col_next = st.columns(2)
-with col_prev:
-    if st.button("⬅️ Previous Memory"):
-        st.session_state.current_memory_index = (st.session_state.current_memory_index - 1) % len(memories)
-        st.rerun()
-with col_next:
-    if st.button("Next Memory ➡️"):
-        st.session_state.current_memory_index = (st.session_state.current_memory_index + 1) % len(memories)
-        st.rerun()
-
-st.markdown("<hr style='border: 1px solid rgba(255,105,180,0.15);'>", unsafe_allow_html=True)
-
-# --- 5. INTERACTIVE HEARTBEAT APOLOGY SECTION ---
-st.markdown("### 💖 Tap The Heart")
-st.write("Aapki narazgi door karne ke liye maine 60+ emotional messages/apologies likhi hain. Heart par click karein!")
-
-# Large pulsing heart display
-st.markdown(
-    """
-    <div class="heart-container">
-        <div class="heart-icon">❤️</div>
-    </div>
-    """,
-    unsafe_allow_html=True
-)
-
-if st.button("💖 Click to Beat the Heart 💖"):
-    st.session_state.heart_clicks += 1
-    st.session_state.current_apology_msg = random.choice(apology_messages)
-    st.balloons() # Interactive balloon effect
-
-# Dynamic feedback message
-st.markdown(
-    f"""
-    <div style="background: rgba(255, 255, 255, 0.8); border-left: 5px solid #ff6fa5; padding: 15px; border-radius: 12px; margin-top: 10px; text-align: center;">
-        <span style="font-size: 11px; font-weight: bold; text-transform: uppercase; color: #ff6fa5; tracking-widest: 1px;">Apology #{st.session_state.heart_clicks}</span>
-        <p style="font-size: 16px; font-weight: bold; color: #4a1525; font-style: italic; margin-top: 5px; line-height: 1.5;">
-            "{st.session_state.current_apology_msg}"
-        </p>
-    </div>
-    """,
-    unsafe_allow_html=True
-)
-
-st.markdown("<hr style='border: 1px solid rgba(255,105,180,0.15);'>", unsafe_allow_html=True)
-
-# --- 6. APOLOGY LETTER (Typewriter progressive release) ---
-st.markdown("### 📝 Dil se Sorry Letter")
-
-letter_lines = [
-    "Dear Ruhii ❤️",
-    "Main perfect nahi hoon, mujhe pata hai...",
-    "Kabhi kabhi mujhse nadani mein bohot badi galtiyan ho jati hain...",
-    "Lekin main dil se kehta hoon, kabhi bhi jaan bujh kar tumhara dil dukhana nahi chaha...",
-    "Tumhari dosti meri life ki sabse khoobsurat aur anmol cheezon mein se ek hai...",
-    "Agar meri kisi bhi baat, mazaak ya behavior se tum hurt hui ho...",
-    "To main sach mein, dil ki gehraiyon se Sorry kehta hoon... 🥺",
-    "Main sirf itna chahta hoon ki hum phir se pehle ki tarah sath has sakein...",
-    "Bematlab ki baaton par ladd sakein aur dher saari achi memories bana sakein...",
-    "Thank you so much for reading this till the end...",
-    "❤️",
-    "— Hassan"
+# --- Define 40+ Heartfelt Apology Messages ---
+APOLOGY_MESSAGES = [
+    "Ruhii, our friendship is too precious to lose over a silly misunderstanding. I am really sorry. 🤍",
+    "I promise to be a better friend who listens, understands, and cares. Please forgive me. 🥺",
+    "Tumhari dosti mere liye sab kuch hai. Please gussa thuk do, yaar. 💔",
+    "Every single day without talking to you feels completely empty. I miss our laughs. 😭",
+    "I hate myself for being the reason behind your sadness. I am truly sorry, Ruhii. 🙏",
+    "You're the best friend I could ever ask for. I'm sorry for letting you down. ❤️",
+    "Mujhse galti ho gayi, Ruhii. Par tumse dosti khone ka darr sabse bada darr hai. 🤍",
+    "I never intended to hurt you. If my words or actions did, I sincerely apologize. 🌸",
+    "Can we please hit the reset button and start fresh? I miss my best friend. 🥺",
+    "Please look at how sorry I am. Your smile is what makes our friendship special. ✨",
+    "No matter how angry you are, I won't stop trying to make things right. You matter too much. ❤️",
+    "Aapki dosti mere liye ek blessing hai, aur main apni galti ki dil se maafi maangta hoon. 🙏",
+    "Our silly arguments shouldn't be bigger than all the beautiful memories we share. 🤍",
+    "I miss our midnight chats, our inside jokes, and how you always understood me. Sorry. 😭",
+    "I was stupid and selfish, but I promise to work on myself for our friendship. Please. 🥺",
+    "Hassan is truly, deeply, and honestly sorry. Please forgimme, Ruhii! ❤️",
+    "Life is too short to hold grudges, especially against your closest buddy. Let's fix this? ✨",
+    "I respect your space, but I also want you to know I'm standing right here, waiting for you. 🤍",
+    "Dosti mein galti ho sakti hai, par dosti ko khatam nahi kiya jata. Please maan jao. 🙏",
+    "If I could turn back time, I would change how I reacted. I'm sorry for being immature. 💔",
+    "You have every right to be mad at me, but please don't shut me out forever. 🥺",
+    "I appreciate you more than words can express. Losing you would be my biggest regret. ❤️",
+    "I value your presence in my life more than my own ego. I am sorry, Ruhii. 🤍",
+    "You always supported me when everyone else left. I feel terrible for hurting you. 😭",
+    "May our friendship heal and grow stronger than ever. I'm sorry from the bottom of my heart. ✨",
+    "Aapki naraazgi mujhse bardaasht nahi hoti. Please maaf kar do. 🙏",
+    "I promise to listen more and talk less next time. I want to understand you better. ❤️",
+    "Our bond is special, and I promise to guard it with all my heart from now on. 🤍",
+    "No matter how far apart we get, you'll always remain my best friend. I'm sorry. 🥺",
+    "I will never take your kindness for granted again. I am truly sorry, Ruhii. 🌸",
+    "You are the sister/bestie I always wanted to protect, not hurt. Please forgive me. 💔",
+    "I'm sorry for being a difficult friend. Thank you for always being patient with me. 🤍",
+    "Let's make new beautiful memories and leave this dark patch behind. Will you? 🙏",
+    "My heart aches knowing I caused you pain. I promise to make it up to you, Ruhii. ❤️",
+    "I miss sharing everything with you. Without you, my stories have no listener. 😭",
+    "Sorry for making you sad. You deserve nothing but endless happiness and laughs. ✨",
+    "Tumhari jagah koi nahi le sakta, Ruhii. Hassan dil se maafi maangta hai. 🥺",
+    "Let's laugh together again soon. I am waiting for that happy day! ❤️",
+    "Even when we don't speak, my prayers always include your happiness. I'm sorry. 🤍",
+    "Please give me one last chance to prove my loyalty and care. I won't disappoint you. 🙏",
+    "I am sorry, Ruhii. Our friendship is my happy place, please don't take it away. ❤️",
+    "A thousand apologies wouldn't be enough, but I'll start with this sincere one. I am sorry. 🥺"
 ]
 
-show_letter = st.checkbox("📖 Click to open the letter...")
-if show_letter:
-    for line in letter_lines:
-        # Centering special lines
-        if "Dear Ruhii" in line or "— Hassan" in line or "❤️" == line.strip():
-            st.markdown(f"<p style='text-align: center; font-weight: bold; font-size: 16px; color: #d6336c;'>{line}</p>", unsafe_allow_html=True)
-        else:
-            st.write(line)
-        time.sleep(0.01) # Soft progressive typing feel
+# --- Initialize Session States ---
+if "current_page" not in st.session_state:
+    st.session_state.current_page = "1. Welcome 🌸"
 
-st.markdown("<hr style='border: 1px solid rgba(255,105,180,0.15);'>", unsafe_allow_html=True)
+if "apology_text" not in st.session_state:
+    st.session_state.apology_text = "Click the button below to see my thoughts..."
 
-# --- 7. PROMISE SECTION ---
-st.markdown("### 🤝 My Promises to You")
+if "apology_clicks" not in st.session_state:
+    st.session_state.apology_clicks = 0
 
-promises = [
-    ("🌸 Respect", "Main hamesha tumhari respect karunga, tumhare rules aur limits ki."),
-    ("🤍 Better Friend", "Main pehle se behtar, samajhdar dost banne ki koshish karunga."),
-    ("😊 Listener", "Main hamesha tumhari baat sununga aur dhyan se samajhunga."),
-    ("❤️ No Heartbreak", "Main kabhi jaan bujh kar tumhara dil hurt nahi karunga."),
-    ("🌹 High Priority", "Hamari friendship mere liye hamesha sab se important rahegi.")
+if "seen_apologies" not in st.session_state:
+    st.session_state.seen_apologies = []
+
+if "forgive_choice" not in st.session_state:
+    st.session_state.forgive_choice = None
+
+# --- Page Navigation in Sidebar ---
+st.sidebar.title("Navigate 🎈")
+pages_list = [
+    "1. Welcome 🌸",
+    "2. Why You Matter 🤍",
+    "3. Beautiful Memories ✨",
+    "4. Reasons ❤️",
+    "5. Promises 🤝",
+    "6. Interactive Heart 💖",
+    "7. Letter ✉️",
+    "8. Final Surprise 🎁"
 ]
+selected_page = st.sidebar.radio("Go to Section:", pages_list, index=pages_list.index(st.session_state.current_page))
 
-# Use Streamlit expanders as beautiful premium accordion cards
-for title, desc in promises:
-    with st.expander(f"✨ {title}"):
-        st.write(desc)
+# Sync sidebar navigation with main stage
+if selected_page != st.session_state.current_page:
+    st.session_state.current_page = selected_page
+    st.rerun()
 
-st.markdown("<hr style='border: 1px solid rgba(255,105,180,0.15);'>", unsafe_allow_html=True)
+# --- HEADER SECTION ---
+st.markdown("<h4 style='text-align: center; color: #d6336c;'>Besties Forever 💗</h4>", unsafe_allow_html=True)
+st.write("---")
 
-# --- 8. SURPRISE FORGIVENESS BOX ---
-st.markdown("### 🎁 Surprise Forgiveness Box")
+# ==========================================
+# PAGE 1: Welcome  (fade in)
+# ==========================================
+if st.session_state.current_page == "1. Welcome 🌸":
+    st.markdown('<div class="anim-welcome">', unsafe_allow_html=True)
+    render_page_decor(st.session_state.current_page)
 
-if not st.session_state.surprise_opened:
-    if st.button("🎁 Open My Heart ❤️"):
-        st.session_state.surprise_opened = True
-        st.snow()
+    st.header("Dear Ruhii 💗")
+
+    st.subheader("I'm Sorry Ruhii ❤️")
+
+    st.info(
+        """
+        "I know I made mistakes.
+        Maybe I hurt you.
+        But losing our friendship hurts me even more."
+        """
+    )
+
+    st.write(
+        "I have created this little space to explain my heart and ask for your forgiveness. "
+        "Please navigate through this website to read my honest thoughts."
+    )
+
+    if st.button("Continue ❤️", use_container_width=True):
+        st.session_state.current_page = "2. Why You Matter 🤍"
         st.rerun()
-else:
-    st.markdown("<h3 style='text-align: center; color: #d6336c;'>💖 Will You Forgive Me? 💖</h3>", unsafe_allow_html=True)
-    
-    col_yes, col_no = st.columns(2)
-    with col_yes:
-        if st.button("❤️ Yes"):
-            st.session_state.forgive_status = "yes"
+
+    st.markdown('</div>', unsafe_allow_html=True)
+
+# ==========================================
+# PAGE 2: Why You Matter  (slide in from left)
+# ==========================================
+elif st.session_state.current_page == "2. Why You Matter 🤍":
+    st.markdown('<div class="anim-matter">', unsafe_allow_html=True)
+    render_page_decor(st.session_state.current_page)
+
+    st.header("Why You Matter 🤍")
+
+    st.subheader("To My Favorite Person")
+
+    st.write(
+        "Ruhii, you are more than just a best friend. You are my anchor, the person who made my "
+        "ordinary days extraordinary. Your laughter is the music of our friendship, and your support "
+        "is what kept me going through thick and thin."
+    )
+
+    st.write(
+        "When I look back at my happiest memories, they almost always have you in them. That's why "
+        "your anger hurts me, and why fixing this is the most important thing to me."
+    )
+
+    st.success("💗 'True friends are like stars, you don't always see them but you know they're always there.'")
+
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("Back ⬅️", use_container_width=True):
+            st.session_state.current_page = "1. Welcome 🌸"
             st.rerun()
-    with col_no:
-        if st.button("🥺 Let Me Think"):
-            st.session_state.forgive_status = "think"
+    with col2:
+        if st.button("See Our Journey ✨", use_container_width=True):
+            st.session_state.current_page = "3. Beautiful Memories ✨"
             st.rerun()
-            
-    if st.session_state.forgive_status == "yes":
+
+    st.markdown('</div>', unsafe_allow_html=True)
+
+# ==========================================
+# PAGE 3: Beautiful Memories  (slide in from right)
+# ==========================================
+elif st.session_state.current_page == "3. Beautiful Memories ✨":
+    st.markdown('<div class="anim-memories">', unsafe_allow_html=True)
+    render_page_decor(st.session_state.current_page)
+
+    st.header("Our Beautiful Memories ✨")
+    st.caption("Here is a quick look at the timeline of our friendship. Click each phase to read.")
+
+    with st.expander("✨ We became friends"):
+        st.write(
+            "Who knew that a casual conversation would turn into one of the most beautiful and "
+            "meaningful friendships of my life? Meeting you was the best thing that ever happened to me."
+        )
+
+    with st.expander("😊 We laughed together"):
+        st.write(
+            "From silly jokes to laughing until our stomachs hurt, our laughters are the most "
+            "genuine moments I cherish. Your happiness has always been contagious."
+        )
+
+    with st.expander("🤍 We supported each other"):
+        st.write(
+            "In low times, we stood together. You were the one who understood me when I was silent, "
+            "and gave me strength when I had none. Your kindness is unmatched."
+        )
+
+    with st.expander("💔 Something went wrong"):
+        st.write(
+            "I made mistakes and let my immaturity or words cause a rift between us. Knowing that "
+            "I am the source of your pain or distance hurts me deeply every day."
+        )
+
+    with st.expander("🙏 I hope we fix everything"):
+        st.write(
+            "I am writing this because our bond is too special to let go. I am ready to do whatever "
+            "it takes to heal our friendship and bring back those golden days."
+        )
+
+    st.write("")
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("Back ⬅️", use_container_width=True):
+            st.session_state.current_page = "2. Why You Matter 🤍"
+            st.rerun()
+    with col2:
+        if st.button("Why I Value You ❤️", use_container_width=True):
+            st.session_state.current_page = "4. Reasons ❤️"
+            st.rerun()
+
+    st.markdown('</div>', unsafe_allow_html=True)
+
+# ==========================================
+# PAGE 4: Reasons  (zoom in)
+# ==========================================
+elif st.session_state.current_page == "4. Reasons ❤️":
+    st.markdown('<div class="anim-reasons">', unsafe_allow_html=True)
+    render_page_decor(st.session_state.current_page)
+
+    st.header("Reasons Why You Matter ❤️")
+    st.write("Five reasons why our friendship is the most valuable connection to me.")
+
+    with st.container(border=True):
+        st.subheader("💗 I Respect You")
+        st.write(
+            "I deeply respect your personality, your boundaries, and the amazing person you are. "
+            "Your opinions and values will always matter immensely to me."
+        )
+
+    with st.container(border=True):
+        st.subheader("💗 I Appreciate You")
+        st.write(
+            "I appreciate every little effort you put into being my friend. Your patience, your caring "
+            "nature, and your presence make my world so much brighter."
+        )
+
+    with st.container(border=True):
+        st.subheader("💗 I Miss You")
+        st.write(
+            "I miss our random chats, your dry humor, your advice, and just knowing that my best friend "
+            "is one tap away. Life feels empty without you."
+        )
+
+    with st.container(border=True):
+        st.subheader("💗 I Never Wanted To Hurt You")
+        st.write(
+            "Hurting you was never, ever my intention. I am deeply regretful for any moment where my "
+            "actions or words failed to show how much I value you."
+        )
+
+    with st.container(border=True):
+        st.subheader("💗 Our Friendship Matters")
+        st.write(
+            "This bond isn't just another contact in my list. It's a connection I want to preserve for "
+            "a lifetime. True friends are rare, and you are irreplaceable."
+        )
+
+    st.write("")
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("Back ⬅️", use_container_width=True):
+            st.session_state.current_page = "3. Beautiful Memories ✨"
+            st.rerun()
+    with col2:
+        if st.button("My Promises 🤝", use_container_width=True):
+            st.session_state.current_page = "5. Promises 🤝"
+            st.rerun()
+
+    st.markdown('</div>', unsafe_allow_html=True)
+
+# ==========================================
+# PAGE 5: Promises  (slide up)
+# ==========================================
+elif st.session_state.current_page == "5. Promises 🤝":
+    st.markdown('<div class="anim-promises">', unsafe_allow_html=True)
+    render_page_decor(st.session_state.current_page)
+
+    st.header("My Promises To You 🤝")
+    st.write("These are my pledges to ensure we never have to face a rough patch like this again.")
+
+    with st.expander("👂 I will listen more"):
+        st.write(
+            "I promise to pay close attention to your feelings, your thoughts, and your concerns, "
+            "without letting my own ego or reactions get in the way."
+        )
+
+    with st.expander("🧠 I will understand better"):
+        st.write(
+            "I will put effort into looking at things from your perspective, understanding your mood, "
+            "and giving you the warmth and space you deserve."
+        )
+
+    with st.expander("🛡️ I will never intentionally hurt you"):
+        st.write(
+            "I pledge to think before I speak and act, and to protect your peace. Your trust is sacred, "
+            "and I will do my best to rebuild and honor it."
+        )
+
+    with st.expander("🤝 I will always respect our friendship"):
+        st.write(
+            "I promise to prioritize our connection, stay honest, apologize quickly when I am wrong, "
+            "and support you through thick and thin, always."
+        )
+
+    st.write("")
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("Back ⬅️", use_container_width=True):
+            st.session_state.current_page = "4. Reasons ❤️"
+            st.rerun()
+    with col2:
+        if st.button("Click My Heart 💖", use_container_width=True):
+            st.session_state.current_page = "6. Interactive Heart 💖"
+            st.rerun()
+
+    st.markdown('</div>', unsafe_allow_html=True)
+
+# ==========================================
+# PAGE 6: Interactive Heart  (bounce in + heartbeat)
+# ==========================================
+elif st.session_state.current_page == "6. Interactive Heart 💖":
+    st.markdown('<div class="anim-heart">', unsafe_allow_html=True)
+    render_page_decor(st.session_state.current_page)
+
+    st.header("Interactive Heart 💖")
+    st.markdown('<div class="heart-pulse">💗</div>', unsafe_allow_html=True)
+    st.write("Every single tap on this heart will show you a unique thought of apology and value from me.")
+
+    st.write(f"**Apologies Read:** {len(st.session_state.seen_apologies)} / {len(APOLOGY_MESSAGES)}")
+
+    if st.button("❤️ Click My Heart ❤️", use_container_width=True, type="primary"):
+        if len(st.session_state.seen_apologies) >= len(APOLOGY_MESSAGES):
+            st.session_state.seen_apologies = []
+
+        remaining_indices = [i for i in range(len(APOLOGY_MESSAGES)) if i not in st.session_state.seen_apologies]
+        chosen_idx = random.choice(remaining_indices)
+
+        st.session_state.seen_apologies.append(chosen_idx)
+        st.session_state.apology_text = APOLOGY_MESSAGES[chosen_idx]
+        st.session_state.apology_clicks += 1
         st.balloons()
-        st.success("🥹 Thank You Ruhii ❤️ Tumne meri dunya phir se haseen aur beautiful bana di hai. Main hamesha dosti nibhaunga!")
-    elif st.session_state.forgive_status == "think":
-        st.info("Main hamesha wait karunga... Jitna bhi waqt lage. Kyun ke sachi dosti dubaara nahi milti ❤️")
 
-st.markdown("<hr style='border: 1px solid rgba(255,105,180,0.15);'>", unsafe_allow_html=True)
+    st.info(f'"{st.session_state.apology_text}"')
 
-# --- 9. ENDING GLOW QUOTE ---
+    st.write("")
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("Back ⬅️", use_container_width=True):
+            st.session_state.current_page = "5. Promises 🤝"
+            st.rerun()
+    with col2:
+        if st.button("Read Letter ✉️", use_container_width=True):
+            st.session_state.current_page = "7. Letter ✉️"
+            st.rerun()
+
+    st.markdown('</div>', unsafe_allow_html=True)
+
+# ==========================================
+# PAGE 7: Letter  (rotate in)
+# ==========================================
+elif st.session_state.current_page == "7. Letter ✉️":
+    st.markdown('<div class="anim-letter">', unsafe_allow_html=True)
+    render_page_decor(st.session_state.current_page)
+
+    st.header("Dear Ruhii ✉️")
+
+    st.write(
+        """
+        *Dear Ruhii,*
+
+        I'm not perfect.
+
+        But every day without our friendship reminds me how valuable you are.
+
+        I'm truly sorry.
+
+        I never wanted to hurt you.
+
+        Please give our friendship another chance.
+
+        No matter what happens, you'll always be special to me.
+
+        — **Hassan** 💗
+        """
+    )
+
+    st.write("")
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("Back ⬅️", use_container_width=True):
+            st.session_state.current_page = "6. Interactive Heart 💖"
+            st.rerun()
+    with col2:
+        if st.button("One Last Surprise 🎁", use_container_width=True):
+            st.session_state.current_page = "8. Final Surprise 🎁"
+            st.rerun()
+
+    st.markdown('</div>', unsafe_allow_html=True)
+
+# ==========================================
+# PAGE 8: Final Surprise  (bounce in + floaty)
+# ==========================================
+elif st.session_state.current_page == "8. Final Surprise 🎁":
+    st.markdown('<div class="anim-surprise">', unsafe_allow_html=True)
+    render_page_decor(st.session_state.current_page)
+
+    st.header("One Last Surprise 🎁")
+    st.markdown('<div class="floaty" style="text-align:center; font-size:2.5rem;">🎁💗🎁</div>', unsafe_allow_html=True)
+    st.write("Please tap the button below to open your surprise!")
+
+    if st.button("🎁 Open Your Surprise ❤️", use_container_width=True):
+        st.session_state.forgive_choice = "pending"
+        st.balloons()
+        st.snow()
+
+    if st.session_state.forgive_choice is not None:
+        st.write("---")
+        st.markdown("<h3 style='text-align: center;'>Will You Forgive Me?</h3>", unsafe_allow_html=True)
+
+        col_yes, col_time = st.columns(2)
+        with col_yes:
+            if st.button("❤️ Yes", use_container_width=True):
+                st.session_state.forgive_choice = "yes"
+                st.balloons()
+        with col_time:
+            if st.button("😊 I Need More Time", use_container_width=True):
+                st.session_state.forgive_choice = "need_time"
+
+        if st.session_state.forgive_choice == "yes":
+            st.success(
+                "**Thank You 💗**  \n"
+                "You made me the happiest friend. I promise to protect our friendship with all my heart!"
+            )
+            st.balloons()
+
+        elif st.session_state.forgive_choice == "need_time":
+            st.warning(
+                "**I'll patiently wait.**  \n"
+                "Because true friendships are worth waiting for. Take all the time you need, Ruhii. 🤍"
+            )
+
+    st.write("")
+    if st.button("Back ⬅️", use_container_width=True):
+        st.session_state.current_page = "7. Letter ✉️"
+        st.rerun()
+
+    st.markdown('</div>', unsafe_allow_html=True)
+
+# --- FOOTER SECTION ---
+st.write("---")
 st.markdown(
-    """
-    <div style="text-align: center; font-size: 1.3rem; font-family: 'Playfair Display', serif; font-style: italic; color: #d6336c; font-weight: bold; margin: 25px 0;">
-        "Kuch log life mein special hote hain... <br> Aur tum un mein se ek ho." <br> ❤️
-    </div>
-    """,
-    unsafe_allow_html=True
-)
-
-st.markdown("<hr style='border: 1px solid rgba(255,105,180,0.15);'>", unsafe_allow_html=True)
-
-# --- 10. FOOTER ---
-st.markdown(
-    """
-    <div style="text-align: center; color: #9b5de5; margin-bottom: 20px;">
-        <p style="font-size: 13px; margin-bottom: 5px;">Made with Love, Respect & Hope.</p>
-        <p style="font-size: 14px; font-weight: bold; margin-bottom: 0;">Forever Your Best Friend,</p>
-        <h3 style="color: #d6336c; margin-top: 5px; font-family: 'Playfair Display', serif;">Hassan ❤️</h3>
-    </div>
-    """,
+    "<p style='text-align: center; font-size: 11px; color: #d6336c;'>"
+    "Made with respect, hope and friendship. — Hassan 💗"
+    "</p>",
     unsafe_allow_html=True
 )
