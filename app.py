@@ -1,6 +1,7 @@
 import streamlit as st
 import random
 import time
+import urllib.parse
 
 # ==========================================
 # PAGE CONFIGURATION
@@ -11,6 +12,13 @@ st.set_page_config(
     layout="centered",
     initial_sidebar_state="collapsed"
 )
+
+# ==========================================
+# USER CONFIGURATION (Hassan, apna number yahan dalein!)
+# ==========================================
+# Pakistan format example: "923001234567" (bina "+" ya "-" ke)
+# Agar aap isse khali chhorhenge (""), to Ruhii ko WhatsApp contact khud select karna hoga.
+HASSAN_WHATSAPP_NUMBER = "" 
 
 # ==========================================
 # SESSION STATE INITIALIZATION
@@ -109,6 +117,27 @@ st.markdown(
         transform: scale(0.97) !important;
     }
 
+    /* WhatsApp custom link style buttons */
+    .whatsapp-btn {
+        display: inline-block;
+        background: linear-gradient(135deg, #25D366, #128C7E) !important;
+        color: white !important;
+        text-decoration: none;
+        padding: 14px 28px;
+        font-weight: 700;
+        font-size: 15px;
+        border-radius: 40px;
+        text-align: center;
+        width: 100%;
+        box-shadow: 0 6px 20px rgba(18, 140, 126, 0.3);
+        transition: all 0.3s ease;
+        margin-top: 15px;
+    }
+    .whatsapp-btn:hover {
+        transform: scale(1.03);
+        box-shadow: 0 8px 25px rgba(18, 140, 126, 0.5);
+    }
+
     /* Heartbeat Pulse Animation */
     .heart-container {
         display: flex;
@@ -171,7 +200,7 @@ st.markdown(
 # DATA FOR THE WEB APP (Roman English)
 # ==========================================
 
-# 60+ Beautiful Apology Messages in Roman English (No White text, readable)
+# 60+ Beautiful Apology Messages in Roman English
 apology_messages = [
     "Mujhe tumhari bohat yaad aati hai. Please maaf kar do na... 🥺",
     "Please naraz mat raho, tumhare bina mera din ekdum adhura hai.",
@@ -247,16 +276,6 @@ memories = [
     {"icon": "🤍", "title": "Har mushkil waqt", "desc": "Jab bhi life ne thoda pareshan kiya, ek dusre ka dhyan rakhna aur humesha support ke liye khade rehna."},
     {"icon": "🌹", "title": "Friendship Forever", "desc": "Ye dosti ek aisi blessing hai jo main kabhi khona nahi chahta. Chahe jo bhi ho, tum hamesha meri sabse pyari dost rahungi."}
 ]
-
-# ==========================================
-# INTERACTIVE MUSIC
-# ==========================================
-# Background Piano Player
-st.markdown("### 🎵 Background Music Player")
-music_url = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" # Soft piano melody
-st.audio(music_url, format="audio/mp3", loop=True)
-st.caption("Music sunne ke liye upar play button press karein! 🎧")
-st.write("---")
 
 # ==========================================
 # STEP-BY-STEP PAGE ROUTING
@@ -482,7 +501,7 @@ elif st.session_state.current_step == 4:
             st.session_state.current_step = 5
             st.rerun()
 
-# 6. STEP 5: SURPRISE BOX & FORGIVENESS
+# 6. STEP 5: SURPRISE BOX & FORGIVENESS WITH NOTIFICATION OPTIONS
 elif st.session_state.current_step == 5:
     st.markdown('<div class="sprinkles-banner">🎁 🎉 🎁 🎉 🎁</div>', unsafe_allow_html=True)
     st.markdown('<h1 class="romantic-title">Surprise Forgiveness Box 🎁</h1>', unsafe_allow_html=True)
@@ -524,6 +543,7 @@ elif st.session_state.current_step == 5:
                 st.session_state.forgive_status = "think"
                 st.rerun()
                 
+        # --- FORGIVENESS FEEDBACKS WITH ACTIVE NOTIFICATION OPTIONS ---
         if st.session_state.forgive_status == "yes":
             st.balloons()
             st.markdown(
@@ -538,6 +558,39 @@ elif st.session_state.current_step == 5:
                 """,
                 unsafe_allow_html=True
             )
+            
+            # Dynamic WhatsApp message generator with actual interactive stats!
+            message_text = (
+                f"Hi Hassan! ❤️ Maine tumhari website poori dekhi.\n\n"
+                f"✨ Maine Interactive Heart ko {st.session_state.heart_clicks} baar click kiya aur aapke sweet messages padhe!\n"
+                f"📸 Hamari saari yaadein bhi dubaara dekhin.\n\n"
+                f"My Decision: YES, I Forgive You! 🥹 besties forever! ❤️"
+            )
+            encoded_message = urllib.parse.quote(message_text)
+            if HASSAN_WHATSAPP_NUMBER:
+                whatsapp_link = f"https://wa.me/{HASSAN_WHATSAPP_NUMBER}?text={encoded_message}"
+            else:
+                whatsapp_link = f"https://wa.me/?text={encoded_message}"
+            
+            st.markdown(
+                f"""
+                <div class="romantic-card" style="text-align: center; border: 2px solid #25D366; background: #e8f5e9; margin-top: 20px;">
+                    <h4 style="color: #128C7E; margin-top:0;">Hassan ko bataiye! 📲</h4>
+                    <p class="romantic-paragraph" style="font-size: 13.5px;">
+                        Niche diye gaye button par click karein taaki Hassan ko pata chale ke aapne use maaf kar diya hai aur kitne heart clicks kiye:
+                    </p>
+                    <a href="{whatsapp_link}" target="_blank" class="whatsapp-btn">
+                        📲 Hassan Ko WhatsApp Par Bhejein ❤️
+                    </a>
+                    <p style="color: #388e3c; font-size: 12px; font-weight: bold; margin-top: 12px;">
+                        Ya phir ye secret code copy karke use WhatsApp karein: <br>
+                        <span style="font-family: monospace; background: #c8e6c9; padding: 4px 8px; border-radius: 6px; font-size: 14px;">RUHII-FORGIVES-HASSAN-CLICKED-{st.session_state.heart_clicks}-TIMES-❤️</span>
+                    </p>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
         elif st.session_state.forgive_status == "think":
             st.markdown(
                 """
@@ -546,6 +599,37 @@ elif st.session_state.current_step == 5:
                     <h3 style="color: #856404; margin-top: 5px;">Main Wait Karunga</h3>
                     <p style="color: #533f03; font-weight: 600; font-size: 15px;">
                         Main hamesha patience ke sath wait karunga. Take all your time, kyuki sachi dosti kabhi lose nahi karni chahiye. ❤️
+                    </p>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+            
+            # Dynamic WhatsApp message generator with actual interactive stats!
+            message_text = (
+                f"Hi Hassan. Maine tumhari website dekhi...\n\n"
+                f"✨ Maine Interactive Heart ko {st.session_state.heart_clicks} baar click kiya.\n\n"
+                f"My Decision: Mujhe thoda waqt chahiye sochne ke liye. 🥺"
+            )
+            encoded_message = urllib.parse.quote(message_text)
+            if HASSAN_WHATSAPP_NUMBER:
+                whatsapp_link = f"https://wa.me/{HASSAN_WHATSAPP_NUMBER}?text={encoded_message}"
+            else:
+                whatsapp_link = f"https://wa.me/?text={encoded_message}"
+            
+            st.markdown(
+                f"""
+                <div class="romantic-card" style="text-align: center; border: 2px solid #ffb300; background: #fffde7; margin-top: 20px;">
+                    <h4 style="color: #b78103; margin-top:0;">Hassan ko update karein! 📲</h4>
+                    <p class="romantic-paragraph" style="font-size: 13.5px;">
+                        Hassan ko batane ke liye niche diye gaye button par click karein:
+                    </p>
+                    <a href="{whatsapp_link}" target="_blank" class="whatsapp-btn" style="background: linear-gradient(135deg, #ffb300, #ff8f00) !important; box-shadow: 0 6px 20px rgba(255,143,0,0.3);">
+                        📲 Hassan Ko WhatsApp Par Bhejein 🥺
+                    </a>
+                    <p style="color: #b78103; font-size: 12px; font-weight: bold; margin-top: 12px;">
+                        Ya phir ye secret code copy karke use WhatsApp karein: <br>
+                        <span style="font-family: monospace; background: #fff9c4; padding: 4px 8px; border-radius: 6px; font-size: 14px;">RUHII-THINKING-HASSAN-CLICKED-{st.session_state.heart_clicks}-TIMES-🥺</span>
                     </p>
                 </div>
                 """,
