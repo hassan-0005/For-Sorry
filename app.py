@@ -2,6 +2,9 @@ import streamlit as st
 import random
 import time
 import urllib.parse
+import json
+import os
+from datetime import datetime
 
 # ==========================================
 # PAGE CONFIGURATION
@@ -14,11 +17,41 @@ st.set_page_config(
 )
 
 # ==========================================
-# USER CONFIGURATION (Hassan, apna number yahan dalein!)
+# SECRET TRACKING LOG SYSTEM (Hassan Ke Liye)
 # ==========================================
-# Pakistan format example: "923001234567" (bina "+" ya "-" ke)
-# Agar aap isse khali chhorhenge (""), to Ruhii ko WhatsApp contact khud select karna hoga.
-HASSAN_WHATSAPP_NUMBER = "" 
+RESPONSES_FILE = "responses.json"
+
+def log_interaction(event_type, details=None):
+    """
+    Saves Ruhii's clicks and selections silently in the background.
+    Hassan can view this by opening the website URL with '?view=hassan'
+    """
+    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    entry = {
+        "timestamp": now,
+        "event_type": event_type,
+        "current_step": st.session_state.get("current_step", 0),
+        "heart_clicks": st.session_state.get("heart_clicks", 0),
+        "details": details or {}
+    }
+    
+    logs = []
+    if os.path.exists(RESPONSES_FILE):
+        try:
+            with open(RESPONSES_FILE, "r", encoding="utf-8") as f:
+                logs = json.load(f)
+        except Exception:
+            logs = []
+            
+    logs.append(entry)
+    if len(logs) > 1000:
+        logs = logs[-1000:]
+        
+    try:
+        with open(RESPONSES_FILE, "w", encoding="utf-8") as f:
+            json.dump(logs, f, indent=4)
+    except Exception:
+        pass
 
 # ==========================================
 # SESSION STATE INITIALIZATION
@@ -35,6 +68,13 @@ if "forgive_status" not in st.session_state:
     st.session_state.forgive_status = None
 if "current_memory_index" not in st.session_state:
     st.session_state.current_memory_index = 0
+if "logged_visit" not in st.session_state:
+    st.session_state.logged_visit = False
+
+# Log initial visit once per session
+if not st.session_state.logged_visit:
+    log_interaction("opened_website")
+    st.session_state.logged_visit = True
 
 # ==========================================
 # MAGICAL CUSTOM ROMANTIC CSS & THEME
@@ -200,7 +240,7 @@ st.markdown(
 # DATA FOR THE WEB APP (Roman English)
 # ==========================================
 
-# 60+ Beautiful Apology Messages in Roman English
+# 60+ Beautiful Apology Messages in Roman English (No White text, readable)
 apology_messages = [
     "Mujhe tumhari bohat yaad aati hai. Please maaf kar do na... 🥺",
     "Please naraz mat raho, tumhare bina mera din ekdum adhura hai.",
@@ -281,6 +321,153 @@ memories = [
 # STEP-BY-STEP PAGE ROUTING
 # ==========================================
 
+# SECRET ADMIN PANEL FOR HASSAN'S EYES ONLY
+query_params = st.query_params
+if "view" in query_params and query_params["view"] == "hassan":
+    st.markdown(
+        """
+        <style>
+        .admin-header {
+            background: linear-gradient(135deg, #2b2d42, #8d99ae) !important;
+            padding: 20px;
+            border-radius: 16px;
+            color: #edf2f4 !important;
+            text-align: center;
+            border: 2px solid #ef233c;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            margin-bottom: 25px;
+        }
+        .admin-card {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 12px;
+            padding: 18px;
+            border-left: 5px solid #ef233c;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            margin-bottom: 15px;
+        }
+        .admin-card p, .admin-card h4 {
+            color: #2b2d42 !important;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+    
+    st.markdown(
+        """
+        <div class="admin-header">
+            <h1 style="color: #edf2f4 !important; margin: 0; font-family: 'Playfair Display', serif;">📊 Hassan's Secret Admin Panel</h1>
+            <p style="color: #edf2f4 !important; font-style: italic; margin-top: 5px; font-size: 1.05rem;">
+                Yahan aap dekh sakte hain ke Ruhii ne kab kab kya click kiya aur kya select kiya! 😉
+            </p>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+    
+    # Load logs
+    logs = []
+    if os.path.exists(RESPONSES_FILE):
+        try:
+            with open(RESPONSES_FILE, "r", encoding="utf-8") as f:
+                logs = json.load(f)
+        except Exception as e:
+            st.error(f"Error loading logs: {e}")
+            
+    if not logs:
+        st.info("Abhi tak koi activity record nahi hui hai. Jab Ruhii website kholegi aur interact karegi, yahan update aa jayega!")
+    else:
+        # Calculate Stats
+        total_clicks = 0
+        final_decision = "N/A"
+        decision_time = "N/A"
+        started_count = 0
+        opened_heart = False
+        
+        for log in logs:
+            e_type = log.get("event_type")
+            if e_type == "opened_website" or e_type == "started_website":
+                started_count += 1
+            if e_type == "heart_clicked":
+                total_clicks = max(total_clicks, log.get("heart_clicks", 0))
+            if e_type == "forgave_hassan_yes":
+                final_decision = "❤️ YES, Maaf Kar Diya!"
+                decision_time = log.get("timestamp")
+            elif e_type == "forgave_hassan_think":
+                final_decision = "🥺 Soch Rahi Hain..."
+                decision_time = log.get("timestamp")
+                
+        # Metrics Display
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.metric("Website Opened", f"{started_count} times")
+        with col2:
+            st.metric("Max Heart Clicks", f"{total_clicks} clicks")
+        with col3:
+            st.metric("Latest Decision", final_decision)
+            
+        if decision_time != "N/A":
+            st.caption(f"Decision Time: {decision_time}")
+            
+        st.write("### 📜 Chronological Activity Log (Har Ek Click):")
+        
+        # Display logs beautifully in a table
+        import pandas as pd
+        
+        # Clean data for nice viewing
+        formatted_logs = []
+        for l in logs:
+            e_type = l.get("event_type", "")
+            # Hindi translation of events for easy reading
+            hindi_event = e_type
+            if e_type == "opened_website":
+                hindi_event = "👀 Website Kholi"
+            elif e_type == "started_website":
+                hindi_event = "➡️ Next Page Click Kiya"
+            elif e_type == "viewed_benefits":
+                hindi_event = "💖 Why Special Page Dekha"
+            elif e_type == "viewed_memories":
+                hindi_event = "📸 Memories Page Dekha"
+            elif e_type == "heart_clicked":
+                hindi_event = "💖 Interactive Heart Beat Kiya"
+            elif e_type == "viewed_promises":
+                hindi_event = "🤝 Promises Screen Dekhi"
+            elif e_type == "viewed_sorry_letter":
+                hindi_event = "✉️ Sorry Letter Kholi"
+            elif e_type == "opened_surprise_box":
+                hindi_event = "🎁 Surprise Box Open Kiya"
+            elif e_type == "forgave_hassan_yes":
+                hindi_event = "❤️ YES Select Kiya (Maaf Kar Diya)"
+            elif e_type == "forgave_hassan_think":
+                hindi_event = "🥺 Let Me Think Select Kiya"
+                
+            formatted_logs.append({
+                "Waqt (Timestamp)": l.get("timestamp"),
+                "Action (Kiya Kiya)": hindi_event,
+                "Current Page Step": l.get("current_step"),
+                "Heart Clicks Count": l.get("heart_clicks", 0)
+            })
+            
+        df = pd.DataFrame(formatted_logs)
+        # Reverse to show newest on top
+        df = df.iloc[::-1].reset_index(drop=True)
+        st.dataframe(df, use_container_width=True)
+        
+        # Action Log list
+        with st.expander("🔍 Raw JSON Logs (For Technical Details)"):
+            st.json(logs)
+            
+        # Reset logs button
+        if st.button("🗑️ Clear All Logs (History Empty Karein)"):
+            if os.path.exists(RESPONSES_FILE):
+                os.remove(RESPONSES_FILE)
+            st.success("Sare logs empty kar diye gaye hain!")
+            st.rerun()
+            
+    st.write("---")
+    st.caption("Admin view exit karne ke liye URL se '?view=hassan' hata dein aur page refresh karein.")
+    st.stop() # Stop further execution for admin
+
 # 1. STEP 0: WELCOME SCREEN
 if st.session_state.current_step == 0:
     st.markdown('<div class="sprinkles-banner">❤️ ✨ 🌸 ⭐ 💖</div>', unsafe_allow_html=True)
@@ -304,6 +491,7 @@ if st.session_state.current_step == 0:
     # Simple, clear and bold navigation button
     if st.button("Aage Chaliye (Start) ➡️"):
         st.session_state.current_step = 1
+        log_interaction("started_website")
         st.rerun()
 
 # 2. STEP 1: WHY YOU MATTER
@@ -349,6 +537,7 @@ elif st.session_state.current_step == 1:
     with col2:
         if st.button("Hamari Yaadein Dekhein ➡️"):
             st.session_state.current_step = 2
+            log_interaction("viewed_benefits")
             st.rerun()
 
 # 3. STEP 2: MEMORY CAROUSEL
@@ -392,6 +581,7 @@ elif st.session_state.current_step == 2:
     with col_fwd:
         if st.button("Maafi Heart Box Pe Chalein ➡️"):
             st.session_state.current_step = 3
+            log_interaction("viewed_memories")
             st.rerun()
 
 # 4. STEP 3: INTERACTIVE HEART & PROMISES
@@ -424,6 +614,7 @@ elif st.session_state.current_step == 3:
     if st.button("💖 Click to Beat the Heart 💖"):
         st.session_state.heart_clicks += 1
         st.session_state.current_apology_msg = random.choice(apology_messages)
+        log_interaction("heart_clicked", {"heart_clicks": st.session_state.heart_clicks, "apology_msg": st.session_state.current_apology_msg})
         st.balloons()
     
     # Apology message display (No white text)
@@ -460,6 +651,7 @@ elif st.session_state.current_step == 3:
     with col_f:
         if st.button("Dil se Sorry Letter Padhein ➡️"):
             st.session_state.current_step = 4
+            log_interaction("viewed_promises")
             st.rerun()
 
 # 5. STEP 4: LETTER FROM HASSAN
@@ -499,9 +691,10 @@ elif st.session_state.current_step == 4:
     with col_l2:
         if st.button("Surprise Box Kholein 🎁➡️"):
             st.session_state.current_step = 5
+            log_interaction("viewed_sorry_letter")
             st.rerun()
 
-# 6. STEP 5: SURPRISE BOX & FORGIVENESS WITH NOTIFICATION OPTIONS
+# 6. STEP 5: SURPRISE BOX & FORGIVENESS WITH SECRET AUTOMATIC LOGS
 elif st.session_state.current_step == 5:
     st.markdown('<div class="sprinkles-banner">🎁 🎉 🎁 🎉 🎁</div>', unsafe_allow_html=True)
     st.markdown('<h1 class="romantic-title">Surprise Forgiveness Box 🎁</h1>', unsafe_allow_html=True)
@@ -520,6 +713,7 @@ elif st.session_state.current_step == 5:
         )
         if st.button("🎁 Open My Heart ❤️"):
             st.session_state.surprise_opened = True
+            log_interaction("opened_surprise_box")
             st.snow()
             st.rerun()
     else:
@@ -537,54 +731,25 @@ elif st.session_state.current_step == 5:
         with col_yes:
             if st.button("❤️ Yes, I Forgive You"):
                 st.session_state.forgive_status = "yes"
+                log_interaction("forgave_hassan_yes", {"heart_clicks": st.session_state.heart_clicks})
                 st.rerun()
         with col_no:
             if st.button("🥺 Let Me Think"):
                 st.session_state.forgive_status = "think"
+                log_interaction("forgave_hassan_think", {"heart_clicks": st.session_state.heart_clicks})
                 st.rerun()
                 
-        # --- FORGIVENESS FEEDBACKS WITH ACTIVE NOTIFICATION OPTIONS ---
+        # --- FORGIVENESS FEEDBACKS (WhatsApp entirely removed, logging is silent) ---
         if st.session_state.forgive_status == "yes":
             st.balloons()
             st.markdown(
                 """
-                <div style="background: rgba(230, 248, 235, 0.95); border: 2px solid #2e7d32; border-radius: 16px; padding: 20px; text-align: center; margin-top: 15px;">
+                <div style="background: rgba(230, 248, 235, 0.95); border: 2px solid #2e7d32; border-radius: 16px; padding: 20px; text-align: center; margin-top: 15px; box-shadow: 0 4px 15px rgba(46, 125, 50, 0.15);">
                     <span style="font-size: 3rem;">🥹</span>
                     <h3 style="color: #2e7d32; margin-top: 5px;">Thank You Ruhii ❤️</h3>
-                    <p style="color: #1b5e20; font-weight: 600; font-size: 15px;">
-                        Tumne meri duniya phir se sabse beautiful aur haseen bana di hai! Main is dosti ko hamesha dil se nibhaunga.
-                    </p>
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
-            
-            # Dynamic WhatsApp message generator with actual interactive stats!
-            message_text = (
-                f"Hi Hassan! ❤️ Maine tumhari website poori dekhi.\n\n"
-                f"✨ Maine Interactive Heart ko {st.session_state.heart_clicks} baar click kiya aur aapke sweet messages padhe!\n"
-                f"📸 Hamari saari yaadein bhi dubaara dekhin.\n\n"
-                f"My Decision: YES, I Forgive You! 🥹 besties forever! ❤️"
-            )
-            encoded_message = urllib.parse.quote(message_text)
-            if HASSAN_WHATSAPP_NUMBER:
-                whatsapp_link = f"https://wa.me/{HASSAN_WHATSAPP_NUMBER}?text={encoded_message}"
-            else:
-                whatsapp_link = f"https://wa.me/?text={encoded_message}"
-            
-            st.markdown(
-                f"""
-                <div class="romantic-card" style="text-align: center; border: 2px solid #25D366; background: #e8f5e9; margin-top: 20px;">
-                    <h4 style="color: #128C7E; margin-top:0;">Hassan ko bataiye! 📲</h4>
-                    <p class="romantic-paragraph" style="font-size: 13.5px;">
-                        Niche diye gaye button par click karein taaki Hassan ko pata chale ke aapne use maaf kar diya hai aur kitne heart clicks kiye:
-                    </p>
-                    <a href="{whatsapp_link}" target="_blank" class="whatsapp-btn">
-                        📲 Hassan Ko WhatsApp Par Bhejein ❤️
-                    </a>
-                    <p style="color: #388e3c; font-size: 12px; font-weight: bold; margin-top: 12px;">
-                        Ya phir ye secret code copy karke use WhatsApp karein: <br>
-                        <span style="font-family: monospace; background: #c8e6c9; padding: 4px 8px; border-radius: 6px; font-size: 14px;">RUHII-FORGIVES-HASSAN-CLICKED-{st.session_state.heart_clicks}-TIMES-❤️</span>
+                    <p style="color: #1b5e20; font-weight: 600; font-size: 15.5px; line-height: 1.6;">
+                        Tumne meri duniya phir se sabse beautiful aur haseen bana di hai! <br>
+                        Main is dosti ko hamesha dil se aur respect ke sath nibhaunga. Besties Forever! ✨
                     </p>
                 </div>
                 """,
@@ -594,42 +759,12 @@ elif st.session_state.current_step == 5:
         elif st.session_state.forgive_status == "think":
             st.markdown(
                 """
-                <div style="background: rgba(255, 243, 205, 0.95); border: 2px solid #856404; border-radius: 16px; padding: 20px; text-align: center; margin-top: 15px;">
+                <div style="background: rgba(255, 243, 205, 0.95); border: 2px solid #856404; border-radius: 16px; padding: 20px; text-align: center; margin-top: 15px; box-shadow: 0 4px 15px rgba(133, 100, 4, 0.15);">
                     <span style="font-size: 3rem;">🥺</span>
                     <h3 style="color: #856404; margin-top: 5px;">Main Wait Karunga</h3>
-                    <p style="color: #533f03; font-weight: 600; font-size: 15px;">
-                        Main hamesha patience ke sath wait karunga. Take all your time, kyuki sachi dosti kabhi lose nahi karni chahiye. ❤️
-                    </p>
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
-            
-            # Dynamic WhatsApp message generator with actual interactive stats!
-            message_text = (
-                f"Hi Hassan. Maine tumhari website dekhi...\n\n"
-                f"✨ Maine Interactive Heart ko {st.session_state.heart_clicks} baar click kiya.\n\n"
-                f"My Decision: Mujhe thoda waqt chahiye sochne ke liye. 🥺"
-            )
-            encoded_message = urllib.parse.quote(message_text)
-            if HASSAN_WHATSAPP_NUMBER:
-                whatsapp_link = f"https://wa.me/{HASSAN_WHATSAPP_NUMBER}?text={encoded_message}"
-            else:
-                whatsapp_link = f"https://wa.me/?text={encoded_message}"
-            
-            st.markdown(
-                f"""
-                <div class="romantic-card" style="text-align: center; border: 2px solid #ffb300; background: #fffde7; margin-top: 20px;">
-                    <h4 style="color: #b78103; margin-top:0;">Hassan ko update karein! 📲</h4>
-                    <p class="romantic-paragraph" style="font-size: 13.5px;">
-                        Hassan ko batane ke liye niche diye gaye button par click karein:
-                    </p>
-                    <a href="{whatsapp_link}" target="_blank" class="whatsapp-btn" style="background: linear-gradient(135deg, #ffb300, #ff8f00) !important; box-shadow: 0 6px 20px rgba(255,143,0,0.3);">
-                        📲 Hassan Ko WhatsApp Par Bhejein 🥺
-                    </a>
-                    <p style="color: #b78103; font-size: 12px; font-weight: bold; margin-top: 12px;">
-                        Ya phir ye secret code copy karke use WhatsApp karein: <br>
-                        <span style="font-family: monospace; background: #fff9c4; padding: 4px 8px; border-radius: 6px; font-size: 14px;">RUHII-THINKING-HASSAN-CLICKED-{st.session_state.heart_clicks}-TIMES-🥺</span>
+                    <p style="color: #533f03; font-weight: 600; font-size: 15.5px; line-height: 1.6;">
+                        Main hamesha sabar ke sath tumhare decision ka wait karunga. <br>
+                        Take all your time, kyuki sachi dosti kabhi lose nahi karni chahiye. ❤️
                     </p>
                 </div>
                 """,
