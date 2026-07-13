@@ -3,7 +3,7 @@
 Dear Ruhii ❤️ - A Heartfelt Apology Website
 Author: Hassan
 Technology: Streamlit (Pure Python)
-Theme: Pink 💗 with per-page entrance animations
+Theme: Pink 💗 with per-page entrance animations + floating hearts & sprinkles
 """
 
 import streamlit as st
@@ -26,6 +26,8 @@ st.markdown(
     /* ---------- Pink Theme ---------- */
     .stApp {
         background: linear-gradient(180deg, #fff0f5 0%, #ffe4ec 50%, #ffd6e8 100%);
+        position: relative;
+        overflow-x: hidden;
     }
 
     section[data-testid="stSidebar"] {
@@ -50,14 +52,16 @@ st.markdown(
         font-weight: 600;
         box-shadow: 0 4px 12px rgba(255, 105, 165, 0.4);
         transition: transform 0.2s ease, box-shadow 0.2s ease;
+        position: relative;
+        z-index: 5;
     }
     div.stButton > button:hover {
-        transform: scale(1.04) translateY(-2px);
-        box-shadow: 0 6px 18px rgba(255, 105, 165, 0.55);
+        transform: scale(1.06) translateY(-3px);
+        box-shadow: 0 6px 20px rgba(255, 105, 165, 0.6);
         color: white;
     }
     div.stButton > button:active {
-        transform: scale(0.97);
+        transform: scale(0.96);
     }
 
     /* Alerts (info/success/warning boxes) */
@@ -65,6 +69,8 @@ st.markdown(
         border-radius: 16px;
         border-left: 6px solid #ff6fa5 !important;
         animation: pulseGlow 2.5s ease-in-out infinite;
+        position: relative;
+        z-index: 5;
     }
 
     /* Expanders */
@@ -73,6 +79,8 @@ st.markdown(
         border-radius: 12px;
         border: 1px solid #ffc2dc !important;
         margin-bottom: 8px;
+        position: relative;
+        z-index: 5;
     }
 
     /* Containers with border (Reasons page cards) */
@@ -81,10 +89,18 @@ st.markdown(
         border: 1px solid #ffc2dc !important;
         background: #fff5f9;
         transition: transform 0.25s ease, box-shadow 0.25s ease;
+        position: relative;
+        z-index: 5;
     }
     div[data-testid="stVerticalBlockBorderWrapper"]:hover {
         transform: translateY(-4px);
         box-shadow: 0 8px 20px rgba(255, 105, 165, 0.25);
+    }
+
+    /* Make sure main block content sits above the floating decor */
+    div[data-testid="stAppViewContainer"] > .main {
+        position: relative;
+        z-index: 3;
     }
 
     /* Heart pulse used on interactive page */
@@ -94,6 +110,41 @@ st.markdown(
         font-size: 3rem;
         text-align: center;
         width: 100%;
+    }
+
+    /* Big soft watermark heart pulsing behind content */
+    .watermark-heart {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 32vw;
+        opacity: 0.06;
+        z-index: 0;
+        pointer-events: none;
+        animation: watermarkPulse 4s ease-in-out infinite;
+        user-select: none;
+    }
+
+    /* Floating hearts & sprinkles container */
+    .floating-decor {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        pointer-events: none;
+        z-index: 1;
+    }
+    .floating-item {
+        position: absolute;
+        bottom: -10%;
+        opacity: 0;
+        animation-name: floatUp;
+        animation-timing-function: ease-in;
+        animation-iteration-count: infinite;
+        will-change: transform, opacity;
     }
 
     /* ---------- Keyframes ---------- */
@@ -141,6 +192,17 @@ st.markdown(
         0%, 100% { transform: translateY(0px); }
         50%      { transform: translateY(-10px); }
     }
+    @keyframes watermarkPulse {
+        0%, 100% { transform: translate(-50%, -50%) scale(1);   opacity: 0.06; }
+        50%      { transform: translate(-50%, -50%) scale(1.08); opacity: 0.1; }
+    }
+    @keyframes floatUp {
+        0%   { transform: translateY(0) translateX(0) rotate(0deg);   opacity: 0; }
+        10%  { opacity: 0.85; }
+        50%  { transform: translateY(-55vh) translateX(15px) rotate(180deg); opacity: 0.9; }
+        90%  { opacity: 0.4; }
+        100% { transform: translateY(-110vh) translateX(-15px) rotate(360deg); opacity: 0; }
+    }
 
     /* ---------- Per-page animation classes ---------- */
     .anim-welcome   { animation: fadeIn 1.1s ease-out; }
@@ -158,6 +220,51 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+
+# =========================================================
+# DECORATION HELPERS: floating hearts/sprinkles + watermark
+# =========================================================
+
+# Emoji sets tailored to each page for extra variety
+PAGE_DECOR = {
+    "1. Welcome 🌸":            ["🌸", "💗", "💕"],
+    "2. Why You Matter 🤍":     ["🤍", "💫", "✨"],
+    "3. Beautiful Memories ✨": ["✨", "🌟", "💖"],
+    "4. Reasons ❤️":            ["❤️", "💐", "💗"],
+    "5. Promises 🤝":           ["🤝", "🌸", "💫"],
+    "6. Interactive Heart 💖":  ["💖", "💓", "💗"],
+    "7. Letter ✉️":             ["✉️", "💌", "🌸"],
+    "8. Final Surprise 🎁":     ["🎁", "🎉", "💗"],
+}
+
+WATERMARK_HEARTS = {
+    "1. Welcome 🌸": "💗", "2. Why You Matter 🤍": "🤍", "3. Beautiful Memories ✨": "💖",
+    "4. Reasons ❤️": "❤️", "5. Promises 🤝": "💗", "6. Interactive Heart 💖": "💓",
+    "7. Letter ✉️": "💌", "8. Final Surprise 🎁": "🎁",
+}
+
+
+def render_floating_decor(emojis, count=18):
+    """Render a full-screen layer of rising, rotating hearts/sprinkles."""
+    items = []
+    for _ in range(count):
+        emoji = random.choice(emojis)
+        left = random.uniform(0, 96)
+        delay = random.uniform(0, 6)
+        duration = random.uniform(6, 12)
+        size = random.uniform(14, 30)
+        items.append(
+            f'<span class="floating-item" style="left:{left:.1f}%; '
+            f'font-size:{size:.0f}px; animation-delay:{delay:.2f}s; '
+            f'animation-duration:{duration:.2f}s;">{emoji}</span>'
+        )
+    html = f'<div class="floating-decor">{"".join(items)}</div>'
+    st.markdown(html, unsafe_allow_html=True)
+
+
+def render_watermark(emoji):
+    st.markdown(f'<div class="watermark-heart">{emoji}</div>', unsafe_allow_html=True)
+
 
 # --- Define 40+ Heartfelt Apology Messages ---
 APOLOGY_MESSAGES = [
@@ -239,6 +346,10 @@ selected_page = st.sidebar.radio("Go to Section:", pages_list, index=pages_list.
 if selected_page != st.session_state.current_page:
     st.session_state.current_page = selected_page
     st.rerun()
+
+# --- Render page-specific floating decor + watermark heart (every page) ---
+render_watermark(WATERMARK_HEARTS[st.session_state.current_page])
+render_floating_decor(PAGE_DECOR[st.session_state.current_page], count=18)
 
 # --- HEADER SECTION ---
 st.markdown("<h4 style='text-align: center; color: #d6336c;'>Besties Forever 💗</h4>", unsafe_allow_html=True)
@@ -485,6 +596,7 @@ elif st.session_state.current_page == "6. Interactive Heart 💖":
         st.session_state.seen_apologies.append(chosen_idx)
         st.session_state.apology_text = APOLOGY_MESSAGES[chosen_idx]
         st.session_state.apology_clicks += 1
+        st.balloons()
 
     st.info(f'"{st.session_state.apology_text}"')
 
