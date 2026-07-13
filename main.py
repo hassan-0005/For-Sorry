@@ -70,6 +70,8 @@ if "current_memory_index" not in st.session_state:
     st.session_state.current_memory_index = 0
 if "logged_visit" not in st.session_state:
     st.session_state.logged_visit = False
+if "hassan_clicks" not in st.session_state:
+    st.session_state.hassan_clicks = 0
 
 # Log initial visit once per session
 if not st.session_state.logged_visit:
@@ -230,6 +232,35 @@ st.markdown(
         background-color: rgba(255, 255, 255, 0.6) !important;
         border: 1px solid rgba(214, 51, 108, 0.2) !important;
         border-radius: 14px !important;
+    }
+
+    /* Hassan Pink Button styling to make it look exactly like inline pink text */
+    div.hassan-pink-btn > div[data-testid="stButton"] > button {
+        background: transparent !important;
+        background-color: transparent !important;
+        color: #ff4d80 !important; /* Beautiful hot pink */
+        border: none !important;
+        font-family: 'Playfair Display', serif !important;
+        font-size: 1.6rem !important;
+        font-weight: 800 !important;
+        box-shadow: none !important;
+        padding: 4px 12px !important;
+        display: inline-block !important;
+        width: auto !important;
+        cursor: pointer !important;
+        transition: transform 0.2s ease-in-out, color 0.2s ease !important;
+        outline: none !important;
+    }
+    div.hassan-pink-btn > div[data-testid="stButton"] > button:hover {
+        color: #ff1a5c !important; /* Slightly deeper pink on hover */
+        transform: scale(1.05) !important;
+        background: transparent !important;
+        background-color: transparent !important;
+    }
+    div.hassan-pink-btn > div[data-testid="stButton"] > button:active {
+        transform: scale(0.95) !important;
+        background: transparent !important;
+        background-color: transparent !important;
     }
     </style>
     """,
@@ -734,20 +765,32 @@ elif st.session_state.current_step == 4:
         "Main sirf itna chahta hoon ki hum phir se pehle ki tarah sath has sakein...",
         "Bematlab ki baaton par ladd sakein aur dher saari achi memories bana sakein...",
         "Thank you so much for reading this till the end...",
-        "❤️",
-        "— Hassan"
+        "❤️"
     ]
     
     # Premium letter board style (Strictly readable maroon/crimson text)
     st.markdown('<div class="romantic-card" style="border: 2px dashed #d6336c; background: #fff5f8;">', unsafe_allow_html=True)
     for line in letter_lines:
-        if "Dear Ruhii" in line or "— Hassan" in line or "❤️" == line.strip():
-            if "— Hassan" in line:
-                st.markdown(f"<p style='text-align: center; font-weight: 800; font-size: 18px; margin: 10px 0;'><a href='?view=hassan' target='_self' style='color: #d6336c !important; text-decoration: none !important;'>— Hassan</a></p>", unsafe_allow_html=True)
-            else:
-                st.markdown(f"<p style='text-align: center; font-weight: 800; font-size: 18px; color: #d6336c; margin: 10px 0;'>{line}</p>", unsafe_allow_html=True)
+        if "Dear Ruhii" in line or "❤️" == line.strip():
+            st.markdown(f"<p style='text-align: center; font-weight: 800; font-size: 18px; color: #d6336c; margin: 10px 0;'>{line}</p>", unsafe_allow_html=True)
         else:
             st.markdown(f"<p style='color: #4a001a; font-size: 15px; font-weight: 500; line-height: 1.6; text-align: center;'>{line}</p>", unsafe_allow_html=True)
+            
+    # Beautiful pink clickable signature (Requires 5 taps to open)
+    st.markdown('<div class="hassan-pink-btn" style="text-align: center; margin-top: 15px;">', unsafe_allow_html=True)
+    sig_label = "— Hassan"
+    if st.session_state.hassan_clicks > 0:
+        sig_label = f"— Hassan ({st.session_state.hassan_clicks}/5)"
+        
+    if st.button(sig_label, key="letter_hassan_signature_btn"):
+        st.session_state.hassan_clicks += 1
+        if st.session_state.hassan_clicks >= 5:
+            st.session_state.hassan_clicks = 0
+            st.query_params["view"] = "hassan"
+            st.rerun()
+        else:
+            st.rerun()
+    st.markdown('</div>', unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
     
     col_l1, col_l2 = st.columns(2)
@@ -858,15 +901,25 @@ st.markdown(
 
 st.markdown(
     """
-    <div style="text-align: center; color: #581845; padding-bottom: 25px;">
+    <div style="text-align: center; color: #581845;">
         <p style="font-size: 13px; margin-bottom: 2px; font-weight: 600;">Made with Love, Respect & Hope.</p>
         <p style="font-size: 14px; font-weight: bold; margin-bottom: 0;">Forever Your Best Friend,</p>
-        <div style="margin-top: 8px;">
-            <a href="?view=hassan" target="_self" style="color: #d6336c !important; text-decoration: none !important; font-family: 'Playfair Display', serif; font-size: 1.6rem; font-weight: bold; display: inline-block; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
-                Hassan ❤️
-            </a>
-        </div>
     </div>
     """,
     unsafe_allow_html=True
 )
+
+st.markdown('<div class="hassan-pink-btn" style="text-align: center; margin-top: 8px; margin-bottom: 25px;">', unsafe_allow_html=True)
+footer_label = "Hassan ❤️"
+if st.session_state.hassan_clicks > 0:
+    footer_label = f"Hassan ❤️ ({st.session_state.hassan_clicks}/5)"
+    
+if st.button(footer_label, key="general_footer_hassan_btn"):
+    st.session_state.hassan_clicks += 1
+    if st.session_state.hassan_clicks >= 5:
+        st.session_state.hassan_clicks = 0
+        st.query_params["view"] = "hassan"
+        st.rerun()
+    else:
+        st.rerun()
+st.markdown('</div>', unsafe_allow_html=True)
