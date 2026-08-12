@@ -56,12 +56,24 @@ def log_user_note(note_text):
 def clear_all_analytics():
     save_logs({"clicks": [], "page_durations": {}, "notes": []})
 
+# Defined Pages List in Roman Urdu
+pages = [
+    "🌸 Pyara Khushamdeed",
+    "🥺 Mujhe Pata Hai Main Ne Hurt Kiya",
+    "💗 Humari Dosti Ki Yaadein",
+    "💌 Mera Khat Tumhare Naam",
+    "🌷 Thoda Waqt Lo Ruhii"
+]
+
 # Track time spent on page transition
 def record_page_transition(new_page):
+    if new_page not in pages:
+        new_page = pages[0]
+        
     old_page = st.session_state.get("current_tracked_page", None)
     start_time = st.session_state.get("page_start_time", None)
     
-    if old_page and start_time:
+    if old_page and start_time and old_page in pages:
         elapsed = time.time() - start_time
         log_page_duration(old_page, elapsed)
         
@@ -71,7 +83,7 @@ def record_page_transition(new_page):
 
 # Set Page Config for Streamlit
 st.set_page_config(
-    page_title="For Ruhii 🌸 | A Magical Apology",
+    page_title="Ruhii Ke Liye 🌸 | A Magical Apology",
     page_icon="🌸",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -155,8 +167,8 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Initialize Session States
-if "page" not in st.session_state:
-    st.session_state.page = "🌸 Dreamy Welcome"
+if "page" not in st.session_state or st.session_state.page not in pages:
+    st.session_state.page = pages[0]
 if "letter_opened" not in st.session_state:
     st.session_state.letter_opened = False
 if "wish_sent" not in st.session_state:
@@ -168,35 +180,29 @@ if "page_start_time" not in st.session_state:
     st.session_state.page_start_time = time.time()
 
 # Navigation Menu
-st.sidebar.title("🌸 Ruhii's World")
+st.sidebar.title("🌸 Ruhii Ki Duniya")
 st.sidebar.markdown("---")
 
-pages = [
-    "🌸 Dreamy Welcome",
-    "🥺 I Know I Hurt You",
-    "💗 Our Friendship",
-    "💌 My Letter",
-    "🌷 Take Your Time"
-]
+current_page_idx = pages.index(st.session_state.page) if st.session_state.page in pages else 0
 
-selected_page = st.sidebar.radio("Navigate Pages", pages, index=pages.index(st.session_state.page))
+selected_page = st.sidebar.radio("Pages Dekhein", pages, index=current_page_idx)
 if selected_page != st.session_state.page:
     log_click_event(f"Tab Navigation -> {selected_page}", st.session_state.page)
     record_page_transition(selected_page)
     st.rerun()
 
 st.sidebar.markdown("---")
-st.sidebar.info("Designed with soft love & care by Hassan 🤍")
+st.sidebar.caption("🌸 For Ruhii with love")
 
 # -------------------------------------------------------------
-# SECRET HASSAN ANALYTICS PORTAL (HIDDEN IN SIDEBAR)
+# SECRET HASSAN ANALYTICS PORTAL (TOTALLY DISCREET & HIDDEN FROM RUHII)
 # -------------------------------------------------------------
-with st.sidebar.expander("🔒 Owner Secret Portal (Hassan Only)"):
-    secret_pass = st.text_input("Enter Secret Password", type="password", key="admin_pwd")
+with st.sidebar.expander("🤍 Secret Portal"):
+    secret_pass = st.text_input("Passkey", type="password", key="admin_pwd", placeholder="Key...")
     if secret_pass == "hassan786" or secret_pass == "hassan123":
-        st.success("Welcome Hassan 🤍 (Secret Tracking Unlocked)")
+        st.success("Khushamdeed Hassan 🤍 (Secret Portal Unlocked)")
         
-        # Flush current page duration before displaying
+        # Update current page duration live
         if "page_start_time" in st.session_state and "current_tracked_page" in st.session_state:
             current_dur = time.time() - st.session_state.page_start_time
             log_page_duration(st.session_state.current_tracked_page, current_dur)
@@ -204,97 +210,97 @@ with st.sidebar.expander("🔒 Owner Secret Portal (Hassan Only)"):
             
         logs = load_logs()
         
-        st.markdown("### ⏱️ Time Spent on Each Tab")
+        st.markdown("#### ⏱️ Har Tab Par Kitna Waqt Guazara")
         durations = logs.get("page_durations", {})
         if durations:
             for page_name, seconds in durations.items():
                 mins = round(seconds / 60, 2)
                 st.write(f"• **{page_name}**: `{seconds}s` (~{mins} mins)")
         else:
-            st.write("No duration logged yet.")
+            st.caption("Abhi tak koi duration log nahi hui.")
             
-        st.markdown("### 🖱️ Button Clicks & Activity Log")
+        st.markdown("#### 🖱️ Click Activity Log")
         clicks = logs.get("clicks", [])
         if clicks:
             for c in reversed(clicks):
-                st.caption(f"[{c['time']}] on *{c['page']}* → **{c['button']}**")
+                st.caption(f"[{c['time']}] *{c['page']}* -> **{c['button']}**")
         else:
-            st.write("No clicks recorded yet.")
+            st.caption("Koi click record nahi hua abhi tak.")
             
-        st.markdown("### ✉️ Notes Left By Ruhii")
+        st.markdown("#### ✉️ Ruhii Ka Paigham")
         notes = logs.get("notes", [])
         if notes:
             for n in reversed(notes):
                 st.write(f"💌 **[{n['time']}]**: {n['text']}")
         else:
-            st.write("No notes submitted yet.")
+            st.caption("Koi message nahi aaya abhi tak.")
             
-        if st.button("🗑️ Reset All Analytics"):
+        if st.button("🗑️ Analytics Reset Karen"):
             clear_all_analytics()
             st.success("Logs reset!")
             st.rerun()
 
 # -------------------------------------------------------------
-# PAGE 1 — DREAMY WELCOME
+# PAGE 1 — PYARA KHUSHAMDEED
 # -------------------------------------------------------------
-if st.session_state.page == "🌸 Dreamy Welcome":
+if st.session_state.page == "🌸 Pyara Khushamdeed":
     st.markdown("""
         <div style="text-align: center; padding: 40px 0;">
             <div class="floating-sticker" style="font-size: 4rem;">🌸 ✨ 🌙</div>
-            <h1 style="font-size: 4.5rem; margin-bottom: 10px;">Hey Ruhii... 🌸</h1>
+            <h1 style="font-size: 4.5rem; margin-bottom: 10px;">Suno Ruhii... 🌸</h1>
             <div class="glass-card" style="max-width: 700px; margin: 0 auto 30px auto;">
-                <p class="handwriting">"I made a tiny little world for someone very special."</p>
-                <p style="font-size: 1.1rem; color: #8A3B4E;">A place of soft thoughts, quiet honesty, and cherished memories.</p>
+                <p class="handwriting">"Main ne ek choti si pyari duniya banayi hai kisi bohat khas ke liye."</p>
+                <p style="font-size: 1.1rem; color: #8A3B4E;">Ek aisi jagah jahan sirf sachai, pyari yaadein aur dil ki baatein hain.</p>
             </div>
         </div>
     """, unsafe_allow_html=True)
 
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
-        if st.button("Enter My World ✨"):
-            log_click_event("Button: Enter My World ✨", "🌸 Dreamy Welcome")
-            record_page_transition("🥺 I Know I Hurt You")
+        if st.button("Meri Duniya Mein Aao ✨"):
+            log_click_event("Button: Meri Duniya Mein Aao ✨", "🌸 Pyara Khushamdeed")
+            record_page_transition("🥺 Mujhe Pata Hai Main Ne Hurt Kiya")
             st.rerun()
 
 # -------------------------------------------------------------
-# PAGE 2 — I KNOW I HURT YOU
+# PAGE 2 — MUJHE PATA HAI MAIN NE HURT KIYA
 # -------------------------------------------------------------
-elif st.session_state.page == "🥺 I Know I Hurt You":
+elif st.session_state.page == "🥺 Mujhe Pata Hai Main Ne Hurt Kiya":
     st.markdown("""
         <div style="text-align: center; padding: 20px 0;">
             <div style="font-size: 3rem;">🥺 🌧️ 🕊️</div>
-            <h1 style="font-size: 3.8rem;">I Know You're Angry... 🥺</h1>
+            <h1 style="font-size: 3.8rem;">Mujhe Pata Hai Tum Naraz Ho... 🥺</h1>
         </div>
     """, unsafe_allow_html=True)
 
     st.markdown("""
         <div class="glass-card">
             <p style="font-size: 1.3rem; line-height: 1.8;">
-                🌸 <b>You trusted me</b> with your thoughts and privacy.<br><br>
-                🤍 <b>You asked me to keep something secret</b> between us.<br><br>
-                💔 <b>I told the same person</b> without thinking properly.<br><br>
-                🌧️ <b>I was completely wrong</b> for doing that.<br><br>
-                🕊️ <b>No excuses.</b> No shifting blame. Just pure regret.
+                🌸 <b>Tumne mujh par bharosa kiya tha</b> apni private baat ke sath.<br><br>
+                🤍 <b>Tumne mujhe kaha tha ke yeh baat secret rakhoon</b> humare beech.<br><br>
+                💔 <b>Main ne bagair soche woh baat batadi</b> usi shakhs ko.<br><br>
+                🌧️ <b>Meri ghalti thi</b> aur main bilkul ghalat tha.<br><br>
+                🕊️ <b>Koi bahana nahi.</b> Koi safai nahi. Sirf dil se pachtawa hai.
             </p>
         </div>
     """, unsafe_allow_html=True)
 
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
-        if st.button("See Our Friendship Memories 💗"):
-            log_click_event("Button: See Our Friendship Memories 💗", "🥺 I Know I Hurt You")
-            record_page_transition("💗 Our Friendship")
+        if st.button("Humari Dosti Ki Yaadein Dekho 💗"):
+            log_click_event("Button: Humari Dosti Ki Yaadein Dekho 💗", "🥺 Mujhe Pata Hai Main Ne Hurt Kiya")
+            record_page_transition("💗 Humari Dosti Ki Yaadein")
             st.rerun()
 
 # -------------------------------------------------------------
-# PAGE 3 — OUR FRIENDSHIP
+# PAGE 3 — HUMARI DOSTI KI YAADEIN
 # -------------------------------------------------------------
-elif st.session_state.page == "💗 Our Friendship":
+elif st.session_state.page == "💗 Humari Dosti Ki Yaadein":
     st.markdown("""
         <div style="text-align: center; padding: 20px 0;">
             <div style="font-size: 3rem;">💖 🦋 🌙</div>
-            <h1 style="font-size: 3.8rem;">Our Friendship 💗</h1>
-            <p style="font-size: 1.2rem; color: #7A2B3E;">Every smile, secret, and story we shared holds an irreplaceable place.</p>
+            <h1 style="font-size: 3.8rem;">Humari Dosti 💗</h1>
+            <p style="font-size: 1.2rem; color: #7A2B3E;">Har muskurahat, har baat aur har lamha mere dil ke bohat kareeb hai.</p>
         </div>
     """, unsafe_allow_html=True)
 
@@ -302,48 +308,48 @@ elif st.session_state.page == "💗 Our Friendship":
     with col1:
         st.markdown("""
             <div class="glass-card">
-                <h3>🌸 First Memory</h3>
-                <p><b>Where it all began:</b> The day we first started talking and realized we share the exact same crazy vibe and comfort.</p>
+                <h3>🌸 Pehli Yaad</h3>
+                <p><b>Jahan se shuruat hui:</b> Jab humari baatein shuru hui aur pata chala ke humara comfort zone bilkul same hai.</p>
             </div>
             <div class="glass-card">
-                <h3>🦋 A Smile I Still Remember</h3>
-                <p><b>Pure warmth:</b> Your genuine smile and laughter when everything felt light and right.</p>
+                <h3>🦋 Ek Muskurahat Jo Mujhe Yaad Hai</h3>
+                <p><b>Khusboo jaisi warmth:</b> Tumhari woh sachi muskurahat jab sab kuch acha lagta tha.</p>
             </div>
         """, unsafe_allow_html=True)
 
     with col2:
         st.markdown("""
             <div class="glass-card">
-                <h3>💗 The Funniest Moment</h3>
-                <p><b>Uncontrollable laughter:</b> That inside joke we couldn't stop laughing about for days on end!</p>
+                <h3>💗 Sab Se Mazedar Lamha</h3>
+                <p><b>Be-ihsiyaas hansi:</b> Woh inside joke jis par hum hase bina nahi reh sakte the!</p>
             </div>
             <div class="glass-card">
-                <h3>🌙 Our Favorite Conversation</h3>
-                <p><b>Late night secrets:</b> Conversations where time completely stopped and we talked about life.</p>
+                <h3>🌙 Humari Khas Baatein</h3>
+                <p><b>Raat ki baatein:</b> Woh guftagu jahan waqt ruk jata tha aur hum zindagi par baatein karte the.</p>
             </div>
         """, unsafe_allow_html=True)
 
     st.markdown("""
         <div class="glass-card" style="text-align: center;">
-            <p class="handwriting">"Some people slowly become home."</p>
+            <p class="handwriting">"Kuch log ahista ahista ghar jaisa sukoon ban jaate hain."</p>
         </div>
     """, unsafe_allow_html=True)
 
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
-        if st.button("Read My Letter 💌"):
-            log_click_event("Button: Read My Letter 💌", "💗 Our Friendship")
-            record_page_transition("💌 My Letter")
+        if st.button("Mera Khat Padhon 💌"):
+            log_click_event("Button: Mera Khat Padhon 💌", "💗 Humari Dosti Ki Yaadein")
+            record_page_transition("💌 Mera Khat Tumhare Naam")
             st.rerun()
 
 # -------------------------------------------------------------
-# PAGE 4 — MY LETTER
+# PAGE 4 — MERA KHAT TUMHARE NAAM
 # -------------------------------------------------------------
-elif st.session_state.page == "💌 My Letter":
+elif st.session_state.page == "💌 Mera Khat Tumhare Naam":
     st.markdown("""
         <div style="text-align: center; padding: 20px 0;">
             <div style="font-size: 3rem;">🎀 🌹 ✉️</div>
-            <h1 style="font-size: 3.8rem;">My Letter To You 💌</h1>
+            <h1 style="font-size: 3.8rem;">Mera Khat Tumhare Naam 💌</h1>
         </div>
     """, unsafe_allow_html=True)
 
@@ -351,26 +357,26 @@ elif st.session_state.page == "💌 My Letter":
         st.markdown("""
             <div class="glass-card" style="text-align: center; padding: 50px;">
                 <div style="font-size: 4rem;">🎀 🪙 🌹</div>
-                <h2 style="font-size: 2.5rem;">To: Dearest Ruhii 🌸</h2>
-                <p style="font-size: 1.1rem; color: #8A3B4E;">Sealed with sincerity & care</p>
+                <h2 style="font-size: 2.5rem;">To: Meri Pyari Ruhii 🌸</h2>
+                <p style="font-size: 1.1rem; color: #8A3B4E;">Khas Mohabbat Aur Sachai Ke Sath Sealed</p>
             </div>
         """, unsafe_allow_html=True)
 
         col1, col2, col3 = st.columns([1, 2, 1])
         with col2:
-            if st.button("Open the Letter 💌"):
-                log_click_event("Button: Open the Letter 💌", "💌 My Letter")
+            if st.button("Khat Kholo 💌"):
+                log_click_event("Button: Khat Kholo 💌", "💌 Mera Khat Tumhare Naam")
                 st.session_state.letter_opened = True
                 st.rerun()
     else:
         st.markdown("""
             <div class="glass-card" style="background: rgba(255, 245, 248, 0.95); border: 2px solid #E6B8B8;">
-                <h2 style="font-size: 2.5rem; margin-bottom: 20px;">Dear Ruhii,</h2>
+                <h2 style="font-size: 2.5rem; margin-bottom: 20px;">Pyari Ruhii,</h2>
                 <div class="letter-text">
-                    <p>I want to apologize from the bottom of my heart. I broke your trust when you asked me to keep something confidential, and I failed you by telling the same person.</p>
-                    <p>This isn't my first mistake, and I completely understand why this time feels different to you. Your disappointment is valid, and I am not here to make excuses.</p>
-                    <p>I am not asking for instant forgiveness. Real trust is built through consistency and actions, not just words.</p>
-                    <p>Please take all the time and space you need. I value our bond too much to ever dismiss your feelings.</p>
+                    <p>Main apne pooray dil se tumse maafi maangna chahta hoon. Main ne tumhara bharosa toda jab tumne mujhe ek baat secret rakhne ko kaha tha, aur main ghalti kar betha.</p>
+                    <p>Yeh meri pehli ghalti nahi hai, aur main achi tarah samajhta hoon ke is baar tumhein kyun itna dukh hua hai. Tumhara naraz hona bilkul sahi hai, aur main koi bahana nahi banaunga.</p>
+                    <p>Main yeh nahi keh raha ke mujhe abhi maaf kar do. Sacha bharosa lafzon se nahi, balki badle hue amal se banta hai.</p>
+                    <p>Jitna waqt aur space tumhein chahiye, bilkul lo. Main humare rishte ki bohat qadar karta hoon.</p>
                 </div>
                 <br>
                 <p class="handwriting" style="text-align: right;">— Hassan 🤍</p>
@@ -379,27 +385,27 @@ elif st.session_state.page == "💌 My Letter":
 
         col1, col2, col3 = st.columns([1, 2, 1])
         with col2:
-            if st.button("Go to Final Page 🌷"):
-                log_click_event("Button: Go to Final Page 🌷", "💌 My Letter")
-                record_page_transition("🌷 Take Your Time")
+            if st.button("Aakhri Page Par Chalo 🌷"):
+                log_click_event("Button: Aakhri Page Par Chalo 🌷", "💌 Mera Khat Tumhare Naam")
+                record_page_transition("🌷 Thoda Waqt Lo Ruhii")
                 st.rerun()
 
 # -------------------------------------------------------------
-# PAGE 5 — TAKE YOUR TIME
+# PAGE 5 — THODA WAQT LO RUHII
 # -------------------------------------------------------------
-elif st.session_state.page == "🌷 Take Your Time":
+elif st.session_state.page == "🌷 Thoda Waqt Lo Ruhii":
     st.markdown("""
         <div style="text-align: center; padding: 20px 0;">
             <div style="font-size: 3rem;">🏮 ✨ 🦋</div>
-            <h1 style="font-size: 3.8rem;">Take Your Time, Ruhii 🌷</h1>
+            <h1 style="font-size: 3.8rem;">Thoda Waqt Lo, Ruhii 🌷</h1>
         </div>
     """, unsafe_allow_html=True)
 
     st.markdown("""
         <div class="glass-card" style="text-align: center; padding: 40px;">
-            <p style="font-size: 2.2rem; font-family: 'Cormorant Garamond', serif;">No pressure.</p>
-            <p style="font-size: 2.2rem; font-family: 'Cormorant Garamond', serif;">No expectations.</p>
-            <p style="font-size: 2.5rem; font-family: 'Cormorant Garamond', serif; font-weight: bold; color: #9E2A4B;">Just a sincere sorry.</p>
+            <p style="font-size: 2.2rem; font-family: 'Cormorant Garamond', serif;">Koi dabaao nahi.</p>
+            <p style="font-size: 2.2rem; font-family: 'Cormorant Garamond', serif;">Koi majboori nahi.</p>
+            <p style="font-size: 2.5rem; font-family: 'Cormorant Garamond', serif; font-weight: bold; color: #9E2A4B;">Sirf ek sachi aur dil se Maafi.</p>
             <br>
             <p class="handwriting">— Hassan 🤍</p>
         </div>
@@ -407,30 +413,30 @@ elif st.session_state.page == "🌷 Take Your Time":
 
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
-        if st.button("Send My Wish ✨"):
-            log_click_event("Button: Send My Wish ✨", "🌷 Take Your Time")
+        if st.button("Mera Paigham Bhejo ✨"):
+            log_click_event("Button: Mera Paigham Bhejo ✨", "🌷 Thoda Waqt Lo Ruhii")
             st.session_state.wish_sent = True
             st.balloons()
 
-    # Optional Message Form
-    st.markdown("### 💌 Leave A Message Back (Optional)")
+    # Message Form
+    st.markdown("### 💌 Hassan Ko Koi Paigham Bhejo (Aapki Marzi)")
     with st.form(key="ruhii_note_form"):
-        user_note_input = st.text_area("Write a message or thought to Hassan...", placeholder="Type your message here...")
-        submit_note = st.form_submit_button("Send Note Back to Hassan 🤍")
+        user_note_input = st.text_area("Apna paigham ya baat yahan likhein...", placeholder="Yahan likhein...")
+        submit_note = st.form_submit_button("Hassan Ko Paigham Bhejo 🤍")
         if submit_note and user_note_input.strip():
-            log_click_event("Submitted Note Back to Hassan", "🌷 Take Your Time")
+            log_click_event("Submitted Note Back to Hassan", "🌷 Thoda Waqt Lo Ruhii")
             log_user_note(user_note_input.strip())
             st.session_state.note_sent_confirm = True
 
     if st.session_state.get("note_sent_confirm", False):
-        st.success("Thank you Ruhii! Your note has been securely received by Hassan 🤍")
+        st.success("Shukriya Ruhii! Aapka paigham Hassan tak pohench gaya hai 🤍")
 
     if st.session_state.wish_sent:
         st.markdown("""
             <div class="glass-card" style="text-align: center; margin-top: 20px; border: 2px solid #FFB6C1;">
                 <div style="font-size: 2.5rem;">🌸 💖 ✨</div>
                 <p class="handwriting">
-                    "I hope one day this hurt becomes just one small chapter of a friendship that grew stronger."
+                    "Mujhe umeed hai ek din yeh dukh humari dosti ka ek chota sa hissa ban kar reh jayega jo pehle se zyada pakki ho gayi."
                 </p>
             </div>
         """, unsafe_allow_html=True)
