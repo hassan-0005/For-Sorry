@@ -10,15 +10,31 @@ import datetime
 LOG_FILE = "ruhii_analytics_log.json"
 
 def load_logs():
+    if "analytics_data" not in st.session_state:
+        st.session_state.analytics_data = {"clicks": [], "page_durations": {}, "notes": []}
+        
     if os.path.exists(LOG_FILE):
         try:
             with open(LOG_FILE, "r") as f:
-                return json.load(f)
+                data = json.load(f)
+                # Merge with session state
+                for note in data.get("notes", []):
+                    if note not in st.session_state.analytics_data["notes"]:
+                        st.session_state.analytics_data["notes"].append(note)
+                for click in data.get("clicks", []):
+                    if click not in st.session_state.analytics_data["clicks"]:
+                        st.session_state.analytics_data["clicks"].append(click)
+                for k, v in data.get("page_durations", {}).items():
+                    st.session_state.analytics_data["page_durations"][k] = max(
+                        st.session_state.analytics_data["page_durations"].get(k, 0.0), v
+                    )
         except Exception:
-            return {"clicks": [], "page_durations": {}, "notes": []}
-    return {"clicks": [], "page_durations": {}, "notes": []}
+            pass
+
+    return st.session_state.analytics_data
 
 def save_logs(data):
+    st.session_state.analytics_data = data
     try:
         with open(LOG_FILE, "w") as f:
             json.dump(data, f, indent=2)
@@ -47,14 +63,17 @@ def log_page_duration(page_name, duration_seconds):
 def log_user_note(note_text):
     logs = load_logs()
     now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    logs["notes"].append({
+    note_item = {
         "time": now_str,
         "text": note_text
-    })
+    }
+    logs["notes"].append(note_item)
     save_logs(logs)
 
 def clear_all_analytics():
-    save_logs({"clicks": [], "page_durations": {}, "notes": []})
+    empty_data = {"clicks": [], "page_durations": {}, "notes": []}
+    st.session_state.analytics_data = empty_data
+    save_logs(empty_data)
 
 # Defined Pages List
 pages = [
@@ -184,6 +203,8 @@ if "letter_opened" not in st.session_state:
     st.session_state.letter_opened = False
 if "wish_sent" not in st.session_state:
     st.session_state.wish_sent = False
+if "admin_authenticated" not in st.session_state:
+    st.session_state.admin_authenticated = False
 
 if "current_tracked_page" not in st.session_state:
     st.session_state.current_tracked_page = st.session_state.page
@@ -191,14 +212,22 @@ if "page_start_time" not in st.session_state:
     st.session_state.page_start_time = time.time()
 
 # -------------------------------------------------------------
-# TOP HEADER WITH DISCREET SECRET PORTAL (TINY HEART CORNER)
+# TOP HEADER WITH WORKING SECRET PORTAL (PERSISTENT STATE)
 # -------------------------------------------------------------
 top_col1, top_col2 = st.columns([12, 1])
 with top_col2:
     with st.expander("🤍"):
-        secret_pass = st.text_input("Key", type="password", key="admin_pwd")
-        if secret_pass == "hassan786" or secret_pass == "hassan123":
-            st.success("Welcome Hassan 🤍")
+        if not st.session_state.admin_authenticated:
+            secret_pass = st.text_input("Passcode", type="password", key="admin_pass_input")
+            if st.button("Unlock 🔓", key="btn_unlock_admin"):
+                if secret_pass == "hassan786" or secret_pass == "hassan123":
+                    st.session_state.admin_authenticated = True
+                    st.rerun()
+                else:
+                    st.error("Incorrect!")
+        
+        if st.session_state.admin_authenticated:
+            st.success("Welcome Hassan 🤍 (Secret Unlocked)")
             
             # Update duration live
             if "page_start_time" in st.session_state and "current_tracked_page" in st.session_state:
@@ -208,16 +237,16 @@ with top_col2:
                 
             logs = load_logs()
             
-            st.markdown("#### ⏱️ Time Spent on Pages")
+            st.markdown("#### ⏱️ Tab Duration")
             durations = logs.get("page_durations", {})
             if durations:
                 for page_name, seconds in durations.items():
                     mins = round(seconds / 60, 2)
-                    st.write(f"• **{page_name}**: `{seconds}s` (~{mins}m)")
+                    st.write(f"• **{page_name}**: `{seconds}s` ({mins}m)")
             else:
                 st.caption("No data yet.")
                 
-            st.markdown("#### 🖱️ Clicks Log")
+            st.markdown("#### 🖱️ Activity Clicks")
             clicks = logs.get("clicks", [])
             if clicks:
                 for c in reversed(clicks):
@@ -225,18 +254,23 @@ with top_col2:
             else:
                 st.caption("No clicks yet.")
                 
-            st.markdown("#### ✉️ Notes From Ruhii")
+            st.markdown("#### 💌 Ruhii's Messages (Saved)")
             notes = logs.get("notes", [])
             if notes:
                 for n in reversed(notes):
                     st.write(f"💌 **[{n['time']}]**: {n['text']}")
             else:
-                st.caption("No notes yet.")
+                st.caption("No message saved yet.")
                 
-            if st.button("🗑️ Reset All"):
-                clear_all_analytics()
-                st.success("Reset!")
-                st.rerun()
+            col_a, col_b = st.columns(2)
+            with col_a:
+                if st.button("Lock 🔒"):
+                    st.session_state.admin_authenticated = False
+                    st.rerun()
+            with col_b:
+                if st.button("Reset All 🗑️"):
+                    clear_all_analytics()
+                    st.rerun()
 
 # -------------------------------------------------------------
 # PAGE 1 — DREAMY WELCOME
@@ -417,17 +451,19 @@ elif st.session_state.page == "🌷 Take Your Time":
             st.balloons()
 
     # Message Form
-    st.markdown("### 💌 Hassan Ko Koi Paigham Bhejo (Optional)")
-    with st.form(key="ruhii_note_form"):
-        user_note_input = st.text_area("Apna paigham ya baat yahan likhein...", placeholder="Yahan likhein...")
-        submit_note = st.form_submit_button("Hassan Ko Paigham Bhejo 🤍")
-        if submit_note and user_note_input.strip():
+    st.markdown("### 💌 Hassan Ko Koi Paigham Bhejo (Aapki Marzi)")
+    user_note_input = st.text_area("Apna paigham ya baat yahan likhein...", placeholder="Yahan likhein...", key="ruhii_note_area")
+    if st.button("Hassan Ko Paigham Bhejo 🤍", key="btn_submit_ruhii_note"):
+        if user_note_input.strip():
             log_click_event("Submitted Note Back to Hassan", "🌷 Take Your Time")
             log_user_note(user_note_input.strip())
             st.session_state.note_sent_confirm = True
+            st.success("Shukriya Ruhii! Aapka paigham Hassan tak pohench gaya hai 🤍")
+        else:
+            st.warning("Pehle kuch likhein phir bhejen!")
 
     if st.session_state.get("note_sent_confirm", False):
-        st.success("Shukriya Ruhii! Aapka paigham Hassan tak pohench gaya hai 🤍")
+        st.info("Aapka message Hassan ke secret vault mein mehfooz hai 🤍")
 
     if st.session_state.wish_sent:
         st.markdown("""
