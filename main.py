@@ -1417,7 +1417,6 @@ streamlit
 
 ```text
 Ruhii-Apology/
-│
 ├── app.py
 └── requirements.txt
 ```
