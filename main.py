@@ -1,14 +1,12 @@
 import streamlit as st
 from pathlib import Path
 import base64
-import html
-import random
 
 # ============================================================
-# RUHII — A MAGICAL APOLOGY EXPERIENCE
-# Streamlit + Python + HTML/CSS only
-# No JavaScript
-# Mobile / Tablet / Desktop responsive
+# RUHII — APOLOGY WEBSITE
+# Streamlit + Python + HTML/CSS
+# No JavaScript / React / Node
+# Responsive for mobile, tablet and desktop
 # ============================================================
 
 st.set_page_config(
@@ -18,76 +16,63 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
-# ============================================================
-# PATHS
-# ============================================================
-
-BASE_DIR = Path(__file__).resolve().parent
-ASSETS_DIR = BASE_DIR / "assets"
-
-# ============================================================
+# ------------------------------------------------------------
 # SESSION STATE
-# ============================================================
+# ------------------------------------------------------------
 
-defaults = {
+for key, default in {
     "entered": False,
     "letter_open": False,
     "wish_released": False,
     "read_everything": False,
-}
-
-for key, value in defaults.items():
+}.items():
     if key not in st.session_state:
-        st.session_state[key] = value
+        st.session_state[key] = default
 
-# ============================================================
-# OPTIONAL ASSET HELPERS
-# ============================================================
+# ------------------------------------------------------------
+# OPTIONAL AUDIO
+# ------------------------------------------------------------
 
-def asset_exists(filename: str) -> bool:
-    return (ASSETS_DIR / filename).is_file()
+BASE_DIR = Path(__file__).resolve().parent
+MUSIC_FILE = BASE_DIR / "assets" / "music.mp3"
 
-
-def audio_data_uri(filename: str):
-    path = ASSETS_DIR / filename
-    if not path.is_file():
+def get_audio_uri(path: Path):
+    if not path.exists():
         return None
-
-    suffix = path.suffix.lower()
     mime = {
         ".mp3": "audio/mpeg",
         ".wav": "audio/wav",
         ".ogg": "audio/ogg",
         ".m4a": "audio/mp4",
-    }.get(suffix)
-
+    }.get(path.suffix.lower())
     if not mime:
         return None
-
     encoded = base64.b64encode(path.read_bytes()).decode("utf-8")
     return f"data:{mime};base64,{encoded}"
 
-
-# ============================================================
-# CUSTOM CSS
-# ============================================================
+# ------------------------------------------------------------
+# CSS
+#
+# IMPORTANT:
+# The previous version used a separate raw-HTML background block.
+# This version creates the background entirely with CSS so
+# Streamlit cannot display <span>/<div> tags as visible text.
+# ------------------------------------------------------------
 
 st.markdown(
-    r"""
+r"""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&display=swap');
 
 :root {
-    --bg: #080611;
-    --bg2: #0d0818;
-    --white: #fffafd;
-    --muted: rgba(255,255,255,.66);
-    --soft: rgba(255,255,255,.46);
+    --bg: #07050d;
+    --white: #fffaff;
+    --muted: rgba(255,255,255,.68);
+    --soft: rgba(255,255,255,.48);
     --lavender: #c4b5fd;
     --purple: #8b5cf6;
     --cyan: #67e8f9;
     --rose: #f9a8d4;
-    --gold: #f5d78e;
 }
 
 html {
@@ -100,20 +85,155 @@ html, body, [class*="css"] {
 
 body {
     margin: 0;
-    background: var(--bg);
+    background: #07050d;
 }
 
 .stApp {
     min-height: 100vh;
     overflow-x: hidden;
     background:
-        radial-gradient(circle at 10% 5%, rgba(139,92,246,.16), transparent 25%),
-        radial-gradient(circle at 90% 15%, rgba(103,232,249,.10), transparent 23%),
-        radial-gradient(circle at 50% 75%, rgba(249,168,212,.07), transparent 30%),
-        linear-gradient(180deg, #05040b 0%, #090612 45%, #05040b 100%);
+        radial-gradient(circle at 8% 4%, rgba(139,92,246,.18), transparent 25%),
+        radial-gradient(circle at 92% 15%, rgba(103,232,249,.10), transparent 23%),
+        radial-gradient(circle at 50% 70%, rgba(236,72,153,.08), transparent 30%),
+        linear-gradient(180deg, #05040a 0%, #0a0612 48%, #05040a 100%);
+    position: relative;
 }
 
-/* Hide Streamlit chrome */
+/* Animated aurora */
+.stApp::before {
+    content: "";
+    position: fixed;
+    width: 58vw;
+    height: 38vw;
+    left: -20vw;
+    top: -15vw;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+    background: #8b5cf6;
+    filter: blur(100px);
+    opacity: .11;
+    animation: auroraOne 14s ease-in-out infinite alternate;
+}
+
+.stApp::after {
+    content: "";
+    position: fixed;
+    width: 50vw;
+    height: 35vw;
+    right: -18vw;
+    top: 25vh;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+    background: #22d3ee;
+    filter: blur(100px);
+    opacity: .08;
+    animation: auroraTwo 17s ease-in-out infinite alternate;
+}
+
+@keyframes auroraOne {
+    from { transform: translate3d(0,0,0) scale(1); }
+    to { transform: translate3d(90px,70px,0) scale(1.18); }
+}
+
+@keyframes auroraTwo {
+    from { transform: translate3d(0,0,0) scale(1); }
+    to { transform: translate3d(-80px,80px,0) scale(1.22); }
+}
+
+/* CSS-only star field */
+.stApp .main::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    opacity: .55;
+    background-image:
+        radial-gradient(circle at 5% 10%, white 0 1px, transparent 1.6px),
+        radial-gradient(circle at 12% 38%, white 0 1px, transparent 1.7px),
+        radial-gradient(circle at 19% 74%, white 0 1px, transparent 1.6px),
+        radial-gradient(circle at 26% 21%, white 0 1px, transparent 1.7px),
+        radial-gradient(circle at 33% 63%, white 0 1px, transparent 1.6px),
+        radial-gradient(circle at 40% 9%, white 0 1px, transparent 1.7px),
+        radial-gradient(circle at 47% 82%, white 0 1px, transparent 1.6px),
+        radial-gradient(circle at 54% 28%, white 0 1px, transparent 1.7px),
+        radial-gradient(circle at 61% 70%, white 0 1px, transparent 1.6px),
+        radial-gradient(circle at 68% 14%, white 0 1px, transparent 1.7px),
+        radial-gradient(circle at 75% 49%, white 0 1px, transparent 1.6px),
+        radial-gradient(circle at 82% 83%, white 0 1px, transparent 1.7px),
+        radial-gradient(circle at 89% 25%, white 0 1px, transparent 1.6px),
+        radial-gradient(circle at 96% 61%, white 0 1px, transparent 1.7px);
+    animation: starPulse 5s ease-in-out infinite alternate;
+}
+
+@keyframes starPulse {
+    from { opacity: .25; }
+    to { opacity: .75; }
+}
+
+/* CSS-only butterfly decorations */
+.butterfly-decoration {
+    position: fixed;
+    z-index: 2;
+    pointer-events: none;
+    font-size: 24px;
+    opacity: .18;
+    filter: drop-shadow(0 0 14px rgba(249,168,212,.5));
+}
+
+.butterfly-one {
+    left: -50px;
+    top: 18%;
+    animation: butterflyOne 18s linear infinite;
+}
+
+.butterfly-two {
+    left: -50px;
+    top: 61%;
+    font-size: 19px;
+    animation: butterflyTwo 22s linear infinite;
+    animation-delay: -7s;
+}
+
+@keyframes butterflyOne {
+    0% { transform: translate(0,0) rotate(-8deg); }
+    25% { transform: translate(28vw,-8vh) rotate(8deg); }
+    50% { transform: translate(58vw,8vh) rotate(-6deg); }
+    75% { transform: translate(82vw,-5vh) rotate(10deg); }
+    100% { transform: translate(115vw,4vh) rotate(-8deg); }
+}
+
+@keyframes butterflyTwo {
+    0% { transform: translate(0,0) rotate(8deg); }
+    50% { transform: translate(55vw,-10vh) rotate(-7deg); }
+    100% { transform: translate(115vw,5vh) rotate(8deg); }
+}
+
+/* Shooting star */
+.shooting-star {
+    position: fixed;
+    left: -150px;
+    top: 18%;
+    width: 120px;
+    height: 1px;
+    z-index: 2;
+    pointer-events: none;
+    opacity: 0;
+    background: linear-gradient(90deg, transparent, white, transparent);
+    transform: rotate(-30deg);
+    animation: shootingStar 10s linear infinite;
+}
+
+@keyframes shootingStar {
+    0%, 72% { transform: translate(0,0) rotate(-30deg); opacity: 0; }
+    76% { opacity: .9; }
+    90% { transform: translate(125vw,65vh) rotate(-30deg); opacity: 0; }
+    100% { opacity: 0; }
+}
+
+/* Streamlit chrome */
 #MainMenu,
 footer,
 [data-testid="stHeader"] {
@@ -121,155 +241,12 @@ footer,
     height: 0;
 }
 
+/* Content */
 .block-container {
     max-width: 1120px;
     padding: 0 22px 70px;
-}
-
-/* ============================================================
-   GLOBAL BACKGROUND
-   ============================================================ */
-
-.magic-bg {
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    overflow: hidden;
-    z-index: 0;
-}
-
-.aurora {
-    position: absolute;
-    width: 48vw;
-    height: 32vw;
-    min-width: 320px;
-    min-height: 230px;
-    border-radius: 50%;
-    filter: blur(85px);
-    opacity: .13;
-    animation: auroraMove 16s ease-in-out infinite alternate;
-}
-
-.aurora.a {
-    left: -14vw;
-    top: -10vw;
-    background: #8b5cf6;
-}
-
-.aurora.b {
-    right: -15vw;
-    top: 22vh;
-    background: #22d3ee;
-    animation-delay: -5s;
-}
-
-.aurora.c {
-    left: 25vw;
-    bottom: -18vw;
-    background: #ec4899;
-    animation-delay: -9s;
-}
-
-@keyframes auroraMove {
-    0% {
-        transform: translate3d(0,0,0) scale(1);
-    }
-    100% {
-        transform: translate3d(90px,70px,0) scale(1.18);
-    }
-}
-
-.star {
-    position: absolute;
-    width: 2px;
-    height: 2px;
-    border-radius: 50%;
-    background: white;
-    opacity: .55;
-    animation: twinkle 4s ease-in-out infinite;
-}
-
-.s1 {left:4%;top:11%;animation-delay:.2s}
-.s2 {left:11%;top:38%;animation-delay:1.3s}
-.s3 {left:17%;top:74%;animation-delay:2.4s}
-.s4 {left:23%;top:21%;animation-delay:.8s}
-.s5 {left:31%;top:63%;animation-delay:2.1s}
-.s6 {left:39%;top:9%;animation-delay:1.1s}
-.s7 {left:46%;top:82%;animation-delay:2.8s}
-.s8 {left:53%;top:28%;animation-delay:.5s}
-.s9 {left:61%;top:70%;animation-delay:1.8s}
-.s10 {left:68%;top:14%;animation-delay:3s}
-.s11 {left:75%;top:49%;animation-delay:1s}
-.s12 {left:82%;top:83%;animation-delay:2.2s}
-.s13 {left:89%;top:25%;animation-delay:.4s}
-.s14 {left:96%;top:61%;animation-delay:2.7s}
-.s15 {left:7%;top:91%;animation-delay:1.6s}
-.s16 {left:35%;top:37%;animation-delay:3.1s}
-.s17 {left:58%;top:5%;animation-delay:1.4s}
-.s18 {left:93%;top:8%;animation-delay:2.5s}
-
-@keyframes twinkle {
-    0%, 100% {opacity:.18; transform:scale(.7)}
-    50% {opacity:1; transform:scale(1.65)}
-}
-
-.butterfly {
-    position: absolute;
-    font-size: 24px;
-    opacity: .18;
-    filter: blur(.15px) drop-shadow(0 0 12px rgba(249,168,212,.55));
-    animation: butterflyFly 18s linear infinite;
-}
-
-.b1 {left:-8%;top:18%;animation-delay:0s}
-.b2 {left:-12%;top:57%;font-size:18px;animation-delay:-7s}
-.b3 {left:-10%;top:78%;font-size:30px;animation-delay:-13s}
-
-@keyframes butterflyFly {
-    0% {
-        transform: translate3d(0,0,0) rotate(-8deg);
-    }
-    25% {
-        transform: translate3d(28vw,-7vh,0) rotate(8deg);
-    }
-    50% {
-        transform: translate3d(58vw,9vh,0) rotate(-6deg);
-    }
-    75% {
-        transform: translate3d(82vw,-4vh,0) rotate(10deg);
-    }
-    100% {
-        transform: translate3d(112vw,5vh,0) rotate(-8deg);
-    }
-}
-
-.shooting-star {
-    position: absolute;
-    width: 115px;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,.9), transparent);
-    transform: rotate(-32deg);
-    opacity: 0;
-    animation: shooting 9s linear infinite;
-}
-
-.sh1 {top:17%;left:-10%;animation-delay:3s}
-.sh2 {top:44%;left:-12%;animation-delay:8s}
-
-@keyframes shooting {
-    0% {transform:translate3d(0,0,0) rotate(-32deg);opacity:0}
-    4% {opacity:1}
-    19% {transform:translate3d(120vw,70vh,0) rotate(-32deg);opacity:0}
-    100% {opacity:0}
-}
-
-/* ============================================================
-   MAIN CONTENT
-   ============================================================ */
-
-.page {
     position: relative;
-    z-index: 3;
+    z-index: 4;
 }
 
 .hero {
@@ -278,18 +255,18 @@ footer,
     align-items: center;
     justify-content: center;
     text-align: center;
-    padding: 50px 0 30px;
+    padding: 45px 0 30px;
 }
 
 .hero-inner {
     width: min(850px, 100%);
-    animation: entrance 1.8s ease both;
+    animation: entrance 1.4s ease both;
 }
 
 @keyframes entrance {
     from {
         opacity: 0;
-        transform: translateY(30px) scale(.97);
+        transform: translateY(28px) scale(.98);
         filter: blur(7px);
     }
     to {
@@ -322,13 +299,13 @@ footer,
 }
 
 @keyframes gradientShift {
-    0% {background-position:0% 50%}
-    50% {background-position:100% 50%}
-    100% {background-position:0% 50%}
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
 }
 
 .hero-sub {
-    max-width: 620px;
+    max-width: 640px;
     margin: 34px auto 0;
     color: var(--muted);
     line-height: 1.95;
@@ -346,13 +323,9 @@ footer,
 }
 
 @keyframes gentleFloat {
-    0%,100% {transform:translateY(0)}
-    50% {transform:translateY(9px)}
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(9px); }
 }
-
-/* ============================================================
-   SECTIONS
-   ============================================================ */
 
 .section {
     padding: 105px 0;
@@ -381,11 +354,8 @@ footer,
     padding: 40px;
     border-radius: 30px;
     border: 1px solid rgba(255,255,255,.10);
-    background:
-        linear-gradient(135deg, rgba(255,255,255,.075), rgba(255,255,255,.025));
-    box-shadow:
-        0 25px 80px rgba(0,0,0,.35),
-        inset 0 1px rgba(255,255,255,.07);
+    background: linear-gradient(135deg, rgba(255,255,255,.075), rgba(255,255,255,.025));
+    box-shadow: 0 25px 80px rgba(0,0,0,.35), inset 0 1px rgba(255,255,255,.07);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
 }
@@ -398,18 +368,13 @@ footer,
     width: 25%;
     height: 300%;
     transform: rotate(20deg);
-    background: linear-gradient(
-        90deg,
-        transparent,
-        rgba(255,255,255,.07),
-        transparent
-    );
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.07), transparent);
     animation: glassShine 8s ease-in-out infinite;
 }
 
 @keyframes glassShine {
-    0%, 72%, 100% {left:-30%}
-    85% {left:120%}
+    0%,72%,100% { left: -30%; }
+    85% { left: 120%; }
 }
 
 .quote-card {
@@ -427,10 +392,7 @@ footer,
     color: #fbf7ff;
 }
 
-/* ============================================================
-   TIMELINE
-   ============================================================ */
-
+/* Timeline */
 .timeline {
     margin-top: 60px;
     position: relative;
@@ -443,13 +405,7 @@ footer,
     top: 0;
     bottom: 0;
     width: 1px;
-    background: linear-gradient(
-        to bottom,
-        transparent,
-        rgba(196,181,253,.75),
-        rgba(103,232,249,.6),
-        transparent
-    );
+    background: linear-gradient(to bottom, transparent, rgba(196,181,253,.75), rgba(103,232,249,.6), transparent);
 }
 
 .timeline-item {
@@ -481,10 +437,7 @@ footer,
     line-height: 1.85;
 }
 
-/* ============================================================
-   MAGICAL CARDS
-   ============================================================ */
-
+/* Cards */
 .magic-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -497,13 +450,13 @@ footer,
     animation: cardFloat 6s ease-in-out infinite;
 }
 
-.magic-card:nth-child(2) {animation-delay:-1.5s}
-.magic-card:nth-child(3) {animation-delay:-3s}
-.magic-card:nth-child(4) {animation-delay:-4.5s}
+.magic-card:nth-child(2) { animation-delay: -1.5s; }
+.magic-card:nth-child(3) { animation-delay: -3s; }
+.magic-card:nth-child(4) { animation-delay: -4.5s; }
 
 @keyframes cardFloat {
-    0%,100% {transform:translateY(0)}
-    50% {transform:translateY(-7px)}
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(-7px); }
 }
 
 .magic-icon {
@@ -524,10 +477,6 @@ footer,
     color: var(--soft);
     line-height: 1.8;
 }
-
-/* ============================================================
-   MEMORY CARDS
-   ============================================================ */
 
 .memory-grid {
     display: grid;
@@ -574,10 +523,7 @@ footer,
     margin-top: 8px;
 }
 
-/* ============================================================
-   ENVELOPE / LETTER
-   ============================================================ */
-
+/* Letter */
 .envelope-area {
     display: flex;
     justify-content: center;
@@ -593,15 +539,13 @@ footer,
     background:
         radial-gradient(circle at 50% 15%, rgba(249,168,212,.12), transparent 35%),
         linear-gradient(145deg, rgba(139,92,246,.15), rgba(255,255,255,.035));
-    box-shadow:
-        0 35px 100px rgba(0,0,0,.45),
-        0 0 80px rgba(249,168,212,.07);
+    box-shadow: 0 35px 100px rgba(0,0,0,.45), 0 0 80px rgba(249,168,212,.07);
     animation: envelopeFloat 5s ease-in-out infinite;
 }
 
 @keyframes envelopeFloat {
-    0%,100% {transform:translateY(0)}
-    50% {transform:translateY(-10px)}
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
 }
 
 .envelope-icon {
@@ -627,15 +571,14 @@ footer,
     padding: clamp(28px, 6vw, 70px);
     border-radius: 32px;
     border: 1px solid rgba(255,255,255,.11);
-    background:
-        linear-gradient(145deg, rgba(255,255,255,.075), rgba(196,181,253,.035));
+    background: linear-gradient(145deg, rgba(255,255,255,.075), rgba(196,181,253,.035));
     box-shadow: 0 35px 100px rgba(0,0,0,.4);
     animation: letterReveal .9s ease both;
 }
 
 @keyframes letterReveal {
-    from {opacity:0;transform:translateY(25px) scale(.98);filter:blur(5px)}
-    to {opacity:1;transform:translateY(0) scale(1);filter:blur(0)}
+    from { opacity: 0; transform: translateY(25px) scale(.98); filter: blur(5px); }
+    to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
 }
 
 .letter-title {
@@ -659,10 +602,7 @@ footer,
     font-style: italic;
 }
 
-/* ============================================================
-   WISH ORB
-   ============================================================ */
-
+/* Wish */
 .wish-wrap {
     text-align: center;
     padding: 30px 0 10px;
@@ -680,15 +620,13 @@ footer,
     background:
         radial-gradient(circle at 35% 30%, rgba(255,255,255,.65), transparent 7%),
         radial-gradient(circle, rgba(196,181,253,.48), rgba(103,232,249,.12) 45%, transparent 72%);
-    box-shadow:
-        0 0 40px rgba(196,181,253,.28),
-        0 0 100px rgba(103,232,249,.10);
+    box-shadow: 0 0 40px rgba(196,181,253,.28), 0 0 100px rgba(103,232,249,.10);
     animation: orbPulse 4s ease-in-out infinite;
 }
 
 @keyframes orbPulse {
-    0%,100% {transform:scale(.96);box-shadow:0 0 35px rgba(196,181,253,.25),0 0 90px rgba(103,232,249,.08)}
-    50% {transform:scale(1.05);box-shadow:0 0 55px rgba(196,181,253,.42),0 0 120px rgba(103,232,249,.15)}
+    0%,100% { transform: scale(.96); }
+    50% { transform: scale(1.05); }
 }
 
 .wish-result {
@@ -703,10 +641,7 @@ footer,
     animation: letterReveal .8s ease both;
 }
 
-/* ============================================================
-   FINAL
-   ============================================================ */
-
+/* Final */
 .final {
     min-height: 88vh;
     display: flex;
@@ -726,8 +661,8 @@ footer,
 }
 
 @keyframes finalGlow {
-    0%,100% {transform:scale(.88);opacity:.65}
-    50% {transform:scale(1.13);opacity:1}
+    0%,100% { transform: scale(.88); opacity: .65; }
+    50% { transform: scale(1.13); opacity: 1; }
 }
 
 .final h1 {
@@ -746,10 +681,7 @@ footer,
     font-size: 16px;
 }
 
-/* ============================================================
-   STREAMLIT BUTTONS
-   ============================================================ */
-
+/* Buttons */
 div.stButton > button {
     width: 100%;
     min-height: 48px;
@@ -771,19 +703,13 @@ div.stButton > button:hover {
     box-shadow: 0 12px 38px rgba(139,92,246,.22), 0 0 35px rgba(249,168,212,.10) !important;
 }
 
-/* ============================================================
-   AUDIO
-   ============================================================ */
-
+/* Audio */
 audio {
     width: 100%;
     margin-top: 12px;
 }
 
-/* ============================================================
-   MOBILE
-   ============================================================ */
-
+/* Mobile */
 @media (max-width: 760px) {
     .block-container {
         padding: 0 14px 50px;
@@ -802,10 +728,6 @@ audio {
         font-size: 14px;
         padding: 0 8px;
         line-height: 1.85;
-    }
-
-    .scroll-hint {
-        margin-top: 42px;
     }
 
     .section {
@@ -890,7 +812,7 @@ audio {
         padding: 0 8px;
     }
 
-    .butterfly {
+    .butterfly-decoration {
         font-size: 19px;
     }
 }
@@ -906,67 +828,44 @@ audio {
 }
 </style>
 """,
-    unsafe_allow_html=True,
+unsafe_allow_html=True,
 )
 
-# ============================================================
-# BACKGROUND HTML
-# ============================================================
-
+# CSS-only decorative elements. These are intentionally tiny HTML
+# elements; unlike the previous version, they are not a large
+# multiline raw-HTML background block.
 st.markdown(
     """
-<div class="magic-bg" aria-hidden="true">
-    <div class="aurora a"></div>
-    <div class="aurora b"></div>
-    <div class="aurora c"></div>
-
-    <span class="star s1"></span><span class="star s2"></span>
-    <span class="star s3"></span><span class="star s4"></span>
-    <span class="star s5"></span><span class="star s6"></span>
-    <span class="star s7"></span><span class="star s8"></span>
-    <span class="star s9"></span><span class="star s10"></span>
-    <span class="star s11"></span><span class="star s12"></span>
-    <span class="star s13"></span><span class="star s14"></span>
-    <span class="star s15"></span><span class="star s16"></span>
-    <span class="star s17"></span><span class="star s18"></span>
-
-    <div class="butterfly b1">🦋</div>
-    <div class="butterfly b2">🦋</div>
-    <div class="butterfly b3">🦋</div>
-
-    <div class="shooting-star sh1"></div>
-    <div class="shooting-star sh2"></div>
-</div>
+<div class="butterfly-decoration butterfly-one">🦋</div>
+<div class="butterfly-decoration butterfly-two">🦋</div>
+<div class="shooting-star"></div>
 """,
     unsafe_allow_html=True,
 )
 
-st.markdown('<main class="page">', unsafe_allow_html=True)
-
 # ============================================================
-# HERO / ENTRANCE
+# HERO
 # ============================================================
 
 st.markdown(
-    """
+"""
 <section class="hero">
     <div class="hero-inner">
         <div class="eyebrow">A little world made for someone important</div>
         <h1>Ruhii</h1>
         <div class="hero-sub">
             Hey, Ruhii… 🦋<br><br>
-            I made a little something for you.
-            Not to force anything. Not to make excuses.
+            I made a little something for you.<br>
+            Not to force anything. Not to make excuses.<br>
             Just to say what I should have said properly.
         </div>
         <div class="scroll-hint">↓ &nbsp; Take your time &nbsp; ↓</div>
     </div>
 </section>
 """,
-    unsafe_allow_html=True,
+unsafe_allow_html=True,
 )
 
-# Entrance button
 if not st.session_state.entered:
     c1, c2, c3 = st.columns([1, 1.5, 1])
     with c2:
@@ -977,11 +876,11 @@ if not st.session_state.entered:
 if st.session_state.entered:
 
     # ========================================================
-    # 01 — WELCOME
+    # 01
     # ========================================================
 
     st.markdown(
-        """
+"""
 <section class="section">
     <div class="section-label">01 / Welcome</div>
     <div class="section-title">Welcome, Ruhii 🌸</div>
@@ -997,15 +896,15 @@ if st.session_state.entered:
     </div>
 </section>
 """,
-        unsafe_allow_html=True,
+unsafe_allow_html=True,
     )
 
     # ========================================================
-    # 02 — I KNOW YOU'RE ANGRY
+    # 02
     # ========================================================
 
     st.markdown(
-        """
+"""
 <section class="section">
     <div class="section-label">02 / I Know</div>
     <div class="section-title">I Know You're Angry… 🥺</div>
@@ -1025,7 +924,6 @@ if st.session_state.entered:
             I made the choice, and I have to own it.
         </p>
     </div>
-
     <div class="glass quote-card">
         <div class="quote">
             “You trusted me with something private,
@@ -1034,15 +932,15 @@ if st.session_state.entered:
     </div>
 </section>
 """,
-        unsafe_allow_html=True,
+unsafe_allow_html=True,
     )
 
     # ========================================================
-    # 03 — NO EXCUSES
+    # 03
     # ========================================================
 
     st.markdown(
-        """
+"""
 <section class="section">
     <div class="section-label">03 / No Excuses</div>
     <div class="section-title">I Won't Make Excuses.</div>
@@ -1061,15 +959,15 @@ if st.session_state.entered:
     </div>
 </section>
 """,
-        unsafe_allow_html=True,
+unsafe_allow_html=True,
     )
 
     # ========================================================
-    # 04 — THE PART THAT HURTS
+    # 04
     # ========================================================
 
     st.markdown(
-        """
+"""
 <section class="section">
     <div class="section-label">04 / The Hard Part</div>
     <div class="section-title">I Understand Why This Time Is Different.</div>
@@ -1082,7 +980,6 @@ if st.session_state.entered:
     </p>
 
     <div class="timeline">
-
         <div class="timeline-item">
             <div class="timeline-dot"></div>
             <div class="timeline-title">You trusted me</div>
@@ -1122,25 +1019,23 @@ if st.session_state.entered:
                 An apology cannot erase a pattern. Only consistent change can.
             </div>
         </div>
-
     </div>
 </section>
 """,
-        unsafe_allow_html=True,
+unsafe_allow_html=True,
     )
 
     # ========================================================
-    # 05 — WHAT I FINALLY UNDERSTAND
+    # 05
     # ========================================================
 
     st.markdown(
-        """
+"""
 <section class="section">
     <div class="section-label">05 / What I Finally Understand</div>
     <div class="section-title">Four Things I Should Have Known.</div>
 
     <div class="magic-grid">
-
         <div class="magic-card glass">
             <div class="magic-icon">🤍</div>
             <h3>Trust</h3>
@@ -1176,19 +1071,18 @@ if st.session_state.entered:
                 It's behaving differently when the next opportunity comes.
             </p>
         </div>
-
     </div>
 </section>
 """,
-        unsafe_allow_html=True,
+unsafe_allow_html=True,
     )
 
     # ========================================================
-    # 06 — OUR FRIENDSHIP
+    # 06
     # ========================================================
 
     st.markdown(
-        """
+"""
 <section class="section">
     <div class="section-label">06 / Our Friendship</div>
     <div class="section-title">Some People Become Special Slowly…</div>
@@ -1198,47 +1092,39 @@ if st.session_state.entered:
         whose presence genuinely matters to you.
         <br><br>
         I won't invent memories for us.
-        These little spaces are here for the real ones only.
+        These spaces are for the real ones only.
     </p>
 
     <div class="memory-grid">
-
         <div class="memory-card">
             <div class="memory-number">01</div>
             <div class="memory-title">A memory worth keeping</div>
-            <div class="memory-text">
-                [ADD YOUR MEMORY HERE]
-            </div>
+            <div class="memory-text">[ADD YOUR MEMORY HERE]</div>
         </div>
 
         <div class="memory-card">
             <div class="memory-number">02</div>
             <div class="memory-title">Something that made you smile</div>
-            <div class="memory-text">
-                [ADD YOUR MEMORY HERE]
-            </div>
+            <div class="memory-text">[ADD YOUR MEMORY HERE]</div>
         </div>
 
         <div class="memory-card">
             <div class="memory-number">03</div>
             <div class="memory-title">A moment I still remember</div>
-            <div class="memory-text">
-                [ADD YOUR MEMORY HERE]
-            </div>
+            <div class="memory-text">[ADD YOUR MEMORY HERE]</div>
         </div>
-
     </div>
 </section>
 """,
-        unsafe_allow_html=True,
+unsafe_allow_html=True,
     )
 
     # ========================================================
-    # 07 — LETTER
+    # 07
     # ========================================================
 
     st.markdown(
-        """
+"""
 <section class="section">
     <div class="section-label">07 / The Letter</div>
     <div class="section-title">A Letter For Ruhii 💌</div>
@@ -1255,7 +1141,7 @@ if st.session_state.entered:
     </div>
 </section>
 """,
-        unsafe_allow_html=True,
+unsafe_allow_html=True,
     )
 
     c1, c2, c3 = st.columns([1, 1.5, 1])
@@ -1267,7 +1153,7 @@ if st.session_state.entered:
 
     if st.session_state.letter_open:
         st.markdown(
-            """
+"""
 <div class="letter">
     <div class="section-label">A letter from Hassan</div>
     <div class="letter-title">Ruhii…</div>
@@ -1316,32 +1202,27 @@ if st.session_state.entered:
         I want to earn it through my actions.
     </p>
 
-    <p>
-        Take all the time you need.
-    </p>
+    <p>Take all the time you need.</p>
 
-    <p>
-        I'm sorry, Ruhii. Really.
-    </p>
+    <p>I'm sorry, Ruhii. Really.</p>
 
     <div class="signature">— Hassan 🤍</div>
 </div>
 """,
-            unsafe_allow_html=True,
+unsafe_allow_html=True,
         )
 
     # ========================================================
-    # 08 — PROMISES
+    # 08
     # ========================================================
 
     st.markdown(
-        """
+"""
 <section class="section">
     <div class="section-label">08 / Promises That Actually Matter</div>
     <div class="section-title">I Won't Ask You To Trust My Words.</div>
 
     <div class="magic-grid">
-
         <div class="magic-card glass">
             <div class="magic-icon">🔐</div>
             <h3>I will protect what you tell me.</h3>
@@ -1375,49 +1256,47 @@ if st.session_state.entered:
                 that I learned something.
             </p>
         </div>
-
     </div>
 </section>
 """,
-        unsafe_allow_html=True,
+unsafe_allow_html=True,
     )
 
     # ========================================================
-    # 09 — MUSIC
+    # 09
     # ========================================================
 
     st.markdown(
-        """
+"""
 <section class="section">
     <div class="section-label">09 / A Quiet Moment</div>
     <div class="section-title">Maybe Let This Moment Breathe.</div>
 
     <div class="glass" style="text-align:center;">
-        <div style="font-size:42px; margin-bottom:12px;">🎧</div>
+        <div style="font-size:42px;margin-bottom:12px;">🎧</div>
         <div class="section-text" style="margin:0 auto;">
-            If you want a song here, place a royalty-free
-            <strong>music.mp3</strong> file inside the <strong>assets</strong>
-            folder. It will appear below automatically.
+            If you want music here, add your own royalty-free
+            <strong>music.mp3</strong> inside the <strong>assets</strong> folder.
         </div>
     </div>
 </section>
 """,
-        unsafe_allow_html=True,
+unsafe_allow_html=True,
     )
 
-    music_uri = audio_data_uri("music.mp3")
+    music_uri = get_audio_uri(MUSIC_FILE)
     if music_uri:
         st.markdown(
-            f'<div style="margin-top:-45px;margin-bottom:50px;"><audio controls src="{music_uri}"></audio></div>',
+            f'<audio controls src="{music_uri}"></audio>',
             unsafe_allow_html=True,
         )
 
     # ========================================================
-    # 10 — MAGICAL WISH
+    # 10
     # ========================================================
 
     st.markdown(
-        """
+"""
 <section class="section">
     <div class="section-label">10 / A Magical Moment</div>
     <div class="section-title">Make A Wish, Ruhii ✨</div>
@@ -1431,7 +1310,7 @@ if st.session_state.entered:
     </div>
 </section>
 """,
-        unsafe_allow_html=True,
+unsafe_allow_html=True,
     )
 
     c1, c2, c3 = st.columns([1, 1.5, 1])
@@ -1443,7 +1322,7 @@ if st.session_state.entered:
 
     if st.session_state.wish_released:
         st.markdown(
-            """
+"""
 <div class="wish-result">
     ✨ 🦋 ✨ 🌸 ✨ 🦋 ✨<br><br>
     I hope one day this hurt becomes just a small chapter
@@ -1451,19 +1330,18 @@ if st.session_state.entered:
     No pressure. No demand. Just hope.
 </div>
 """,
-            unsafe_allow_html=True,
+unsafe_allow_html=True,
         )
 
     # ========================================================
-    # 11 — FINAL APOLOGY
+    # 11
     # ========================================================
 
     st.markdown(
-        """
+"""
 <section class="final">
     <div>
         <div class="final-glow"></div>
-
         <div class="section-label">11 / One Last Thing</div>
 
         <h1>
@@ -1485,15 +1363,15 @@ if st.session_state.entered:
     </div>
 </section>
 """,
-        unsafe_allow_html=True,
+unsafe_allow_html=True,
     )
 
     # ========================================================
-    # 12 — FINAL SCREEN
+    # 12
     # ========================================================
 
     st.markdown(
-        """
+"""
 <section class="section" style="text-align:center;padding-top:40px;">
     <div class="section-label">12 / Take Your Time</div>
     <div class="section-title">Take Your Time, Ruhii. 🌙</div>
@@ -1504,17 +1382,12 @@ if st.session_state.entered:
             No expectations.<br>
             Just a sincere sorry. 🤍
         </div>
-
         <div class="signature">— Hassan</div>
     </div>
 </section>
 """,
-        unsafe_allow_html=True,
+unsafe_allow_html=True,
     )
-
-    # ========================================================
-    # FINAL BUTTON
-    # ========================================================
 
     st.markdown(
         '<div style="max-width:360px;margin:10px auto 60px;">',
@@ -1530,7 +1403,7 @@ if st.session_state.entered:
 
     if st.session_state.read_everything:
         st.markdown(
-            """
+"""
 <div class="glass" style="text-align:center;max-width:650px;margin:0 auto 70px;">
     <div style="font-family:'Cormorant Garamond',serif;font-size:48px;">
         Thank you, Ruhii. 🤍
@@ -1541,12 +1414,12 @@ if st.session_state.entered:
     </p>
 </div>
 """,
-            unsafe_allow_html=True,
+unsafe_allow_html=True,
         )
 
 st.markdown(
-    """
-<footer style="
+"""
+<div style="
     position:relative;
     z-index:4;
     text-align:center;
@@ -1556,9 +1429,7 @@ st.markdown(
     padding:20px 0 45px;
 ">
     MADE WITH SINCERITY · FOR RUHII
-</footer>
+</div>
 """,
-    unsafe_allow_html=True,
+unsafe_allow_html=True,
 )
-
-st.markdown("</main>", unsafe_allow_html=True)
