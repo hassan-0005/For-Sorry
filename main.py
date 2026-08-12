@@ -1,500 +1,436 @@
 import streamlit as st
-import random
+import time
+import json
+import os
+import datetime
 
-# ----------------------------------------------------------------------------
-# PAGE CONFIG
-# ----------------------------------------------------------------------------
+# -------------------------------------------------------------
+# PERSISTENT ANALYTICS LOGGING SYSTEM (FOR HASSAN ONLY)
+# -------------------------------------------------------------
+LOG_FILE = "ruhii_analytics_log.json"
+
+def load_logs():
+    if os.path.exists(LOG_FILE):
+        try:
+            with open(LOG_FILE, "r") as f:
+                return json.load(f)
+        except Exception:
+            return {"clicks": [], "page_durations": {}, "notes": []}
+    return {"clicks": [], "page_durations": {}, "notes": []}
+
+def save_logs(data):
+    try:
+        with open(LOG_FILE, "w") as f:
+            json.dump(data, f, indent=2)
+    except Exception:
+        pass
+
+def log_click_event(button_name, page_name):
+    logs = load_logs()
+    now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    logs["clicks"].append({
+        "time": now_str,
+        "button": button_name,
+        "page": page_name
+    })
+    save_logs(logs)
+
+def log_page_duration(page_name, duration_seconds):
+    if duration_seconds <= 0.5:
+        return
+    logs = load_logs()
+    if page_name not in logs["page_durations"]:
+        logs["page_durations"][page_name] = 0.0
+    logs["page_durations"][page_name] += round(duration_seconds, 1)
+    save_logs(logs)
+
+def log_user_note(note_text):
+    logs = load_logs()
+    now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    logs["notes"].append({
+        "time": now_str,
+        "text": note_text
+    })
+    save_logs(logs)
+
+def clear_all_analytics():
+    save_logs({"clicks": [], "page_durations": {}, "notes": []})
+
+# Track time spent on page transition
+def record_page_transition(new_page):
+    old_page = st.session_state.get("current_tracked_page", None)
+    start_time = st.session_state.get("page_start_time", None)
+    
+    if old_page and start_time:
+        elapsed = time.time() - start_time
+        log_page_duration(old_page, elapsed)
+        
+    st.session_state.current_tracked_page = new_page
+    st.session_state.page_start_time = time.time()
+    st.session_state.page = new_page
+
+# Set Page Config for Streamlit
 st.set_page_config(
-    page_title="For Ruhii 🌸",
+    page_title="For Ruhii 🌸 | A Magical Apology",
     page_icon="🌸",
     layout="wide",
-    initial_sidebar_state="collapsed",
+    initial_sidebar_state="expanded"
 )
 
-# ----------------------------------------------------------------------------
-# SESSION STATE
-# ----------------------------------------------------------------------------
+# Custom CSS for Dreamy Princess Light-Pink Aesthetics
+st.markdown("""
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Dancing+Script:wght@400..700&family=Quicksand:wght@300..700&display=swap');
+
+    /* Global Body styling */
+    .stApp {
+        background: linear-gradient(180deg, #FFF5F7 0%, #FFE4E8 50%, #FFF0F4 100%);
+        color: #5A3A42;
+        font-family: 'Quicksand', sans-serif;
+    }
+
+    /* Headings */
+    h1, h2, h3 {
+        font-family: 'Cormorant Garamond', serif !important;
+        color: #4A1525 !important;
+    }
+
+    /* Glassmorphism Panel */
+    .glass-card {
+        background: rgba(255, 240, 245, 0.75);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 182, 193, 0.6);
+        border-radius: 24px;
+        padding: 28px;
+        box-shadow: 0 12px 32px 0 rgba(230, 150, 170, 0.18);
+        margin-bottom: 20px;
+    }
+
+    .handwriting {
+        font-family: 'Dancing Script', cursive !important;
+        font-size: 2.2rem !important;
+        color: #9E2A4B !important;
+    }
+
+    .letter-text {
+        font-family: 'Caveat', cursive !important;
+        font-size: 1.8rem !important;
+        line-height: 1.5 !important;
+        color: #4A1525 !important;
+    }
+
+    /* Floating Heart Animation */
+    @keyframes float {
+        0% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-15px) rotate(5deg); }
+        100% { transform: translateY(0px) rotate(0deg); }
+    }
+
+    .floating-sticker {
+        display: inline-block;
+        animation: float 4s ease-in-out infinite;
+    }
+
+    /* Custom Streamlit Buttons */
+    .stButton>button {
+        background: linear-gradient(135deg, #FFB6C1 0%, #FFC0CB 50%, #FFB7C5 100%) !important;
+        color: #4A1525 !important;
+        font-family: 'Cormorant Garamond', serif !important;
+        font-weight: 700 !important;
+        font-size: 1.3rem !important;
+        border-radius: 50px !important;
+        border: 2px solid #E6B8B8 !important;
+        box-shadow: 0 6px 20px rgba(255, 150, 175, 0.4) !important;
+        padding: 12px 32px !important;
+        transition: all 0.3s ease !important;
+        width: 100% !important;
+    }
+
+    .stButton>button:hover {
+        transform: scale(1.03) translateY(-2px) !important;
+        box-shadow: 0 10px 28px rgba(255, 130, 160, 0.6) !important;
+    }
+</style>
+""", unsafe_allow_html=True)
+
+# Initialize Session States
 if "page" not in st.session_state:
-    st.session_state.page = "welcome"
-if "letter_open" not in st.session_state:
-    st.session_state.letter_open = False
+    st.session_state.page = "🌸 Dreamy Welcome"
+if "letter_opened" not in st.session_state:
+    st.session_state.letter_opened = False
 if "wish_sent" not in st.session_state:
     st.session_state.wish_sent = False
 
+if "current_tracked_page" not in st.session_state:
+    st.session_state.current_tracked_page = st.session_state.page
+if "page_start_time" not in st.session_state:
+    st.session_state.page_start_time = time.time()
 
-def go_to(page_name: str):
-    st.session_state.page = page_name
+# Navigation Menu
+st.sidebar.title("🌸 Ruhii's World")
+st.sidebar.markdown("---")
 
+pages = [
+    "🌸 Dreamy Welcome",
+    "🥺 I Know I Hurt You",
+    "💗 Our Friendship",
+    "💌 My Letter",
+    "🌷 Take Your Time"
+]
 
-# ----------------------------------------------------------------------------
-# HELPERS — FLOATING DECORATIVE OVERLAYS (pure CSS, no JS)
-# ----------------------------------------------------------------------------
-def floating_layer(emojis, count=18, css_class="floaty"):
-    """Generates a fixed full-screen overlay of randomly placed floating emoji."""
-    spans = []
-    for i in range(count):
-        emoji = random.choice(emojis)
-        left = random.uniform(0, 100)
-        delay = random.uniform(0, 12)
-        duration = random.uniform(10, 20)
-        size = random.uniform(14, 30)
-        spans.append(
-            f'<span class="{css_class}" style="left:{left}vw; '
-            f'animation-delay:{delay}s; animation-duration:{duration}s; '
-            f'font-size:{size}px;">{emoji}</span>'
-        )
-    html = f'<div class="floaty-wrapper">{"".join(spans)}</div>'
-    st.markdown(html, unsafe_allow_html=True)
+selected_page = st.sidebar.radio("Navigate Pages", pages, index=pages.index(st.session_state.page))
+if selected_page != st.session_state.page:
+    log_click_event(f"Tab Navigation -> {selected_page}", st.session_state.page)
+    record_page_transition(selected_page)
+    st.rerun()
 
+st.sidebar.markdown("---")
+st.sidebar.info("Designed with soft love & care by Hassan 🤍")
 
-# ----------------------------------------------------------------------------
-# GLOBAL CSS
-# ----------------------------------------------------------------------------
-def inject_global_css():
-    st.markdown(
-        """
-        <style>
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Dancing+Script:wght@500;600;700&family=Poppins:wght@300;400;500;600&display=swap');
+# -------------------------------------------------------------
+# SECRET HASSAN ANALYTICS PORTAL (HIDDEN IN SIDEBAR)
+# -------------------------------------------------------------
+with st.sidebar.expander("🔒 Owner Secret Portal (Hassan Only)"):
+    secret_pass = st.text_input("Enter Secret Password", type="password", key="admin_pwd")
+    if secret_pass == "hassan786" or secret_pass == "hassan123":
+        st.success("Welcome Hassan 🤍 (Secret Tracking Unlocked)")
+        
+        # Flush current page duration before displaying
+        if "page_start_time" in st.session_state and "current_tracked_page" in st.session_state:
+            current_dur = time.time() - st.session_state.page_start_time
+            log_page_duration(st.session_state.current_tracked_page, current_dur)
+            st.session_state.page_start_time = time.time()
+            
+        logs = load_logs()
+        
+        st.markdown("### ⏱️ Time Spent on Each Tab")
+        durations = logs.get("page_durations", {})
+        if durations:
+            for page_name, seconds in durations.items():
+                mins = round(seconds / 60, 2)
+                st.write(f"• **{page_name}**: `{seconds}s` (~{mins} mins)")
+        else:
+            st.write("No duration logged yet.")
+            
+        st.markdown("### 🖱️ Button Clicks & Activity Log")
+        clicks = logs.get("clicks", [])
+        if clicks:
+            for c in reversed(clicks):
+                st.caption(f"[{c['time']}] on *{c['page']}* → **{c['button']}**")
+        else:
+            st.write("No clicks recorded yet.")
+            
+        st.markdown("### ✉️ Notes Left By Ruhii")
+        notes = logs.get("notes", [])
+        if notes:
+            for n in reversed(notes):
+                st.write(f"💌 **[{n['time']}]**: {n['text']}")
+        else:
+            st.write("No notes submitted yet.")
+            
+        if st.button("🗑️ Reset All Analytics"):
+            clear_all_analytics()
+            st.success("Logs reset!")
+            st.rerun()
 
-        html, body, [class*="css"] {
-            font-family: 'Poppins', sans-serif;
-        }
-
-        #MainMenu {visibility: hidden;}
-        footer {visibility: hidden;}
-        header {visibility: hidden;}
-
-        .stApp {
-            background: linear-gradient(160deg, #fff0f5 0%, #ffe4ec 30%, #ffd9e8 60%, #f6c9e0 100%);
-            background-attachment: fixed;
-            background-size: 400% 400%;
-            animation: gradientShift 18s ease infinite;
-            overflow-x: hidden;
-        }
-
-        @keyframes gradientShift {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        /* ---------- Floating overlay elements ---------- */
-        .floaty-wrapper {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100vw; height: 100vh;
-            pointer-events: none;
-            overflow: hidden;
-            z-index: 0;
-        }
-        .floaty {
-            position: absolute;
-            top: 110vh;
-            opacity: 0.85;
-            animation-name: floatUp;
-            animation-timing-function: ease-in-out;
-            animation-iteration-count: infinite;
-            filter: drop-shadow(0 0 6px rgba(255, 182, 213, 0.6));
-        }
-        @keyframes floatUp {
-            0% { transform: translateY(0) translateX(0) rotate(0deg); opacity: 0; }
-            10% { opacity: 0.9; }
-            50% { transform: translateY(-55vh) translateX(15px) rotate(10deg); }
-            90% { opacity: 0.7; }
-            100% { transform: translateY(-115vh) translateX(-15px) rotate(-8deg); opacity: 0; }
-        }
-
-        /* ---------- Headings ---------- */
-        .dream-title {
-            font-family: 'Playfair Display', serif;
-            font-weight: 700;
-            text-align: center;
-            background: linear-gradient(90deg, #d6336c, #ff8fab, #c2185b);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            animation: shimmerText 5s ease-in-out infinite, fadeSlideUp 1.4s ease;
-            text-shadow: 0 0 25px rgba(255, 182, 213, 0.35);
-            margin-bottom: 0.3em;
-        }
-        @keyframes shimmerText {
-            0%, 100% { filter: brightness(1); }
-            50% { filter: brightness(1.25); }
-        }
-        @keyframes fadeSlideUp {
-            from { opacity: 0; transform: translateY(35px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .script-quote {
-            font-family: 'Dancing Script', cursive;
-            font-weight: 600;
-            text-align: center;
-            color: #ad1457;
-            animation: fadeSlideUp 1.8s ease;
-        }
-
-        .soft-para {
-            font-family: 'Poppins', sans-serif;
-            font-weight: 400;
-            color: #7a2e46;
-            text-align: center;
-            line-height: 1.9;
-            animation: fadeSlideUp 2s ease;
-        }
-
-        /* ---------- Glass Card ---------- */
-        .glass-card {
-            background: rgba(255, 255, 255, 0.45);
-            backdrop-filter: blur(14px);
-            -webkit-backdrop-filter: blur(14px);
-            border-radius: 26px;
-            border: 1px solid rgba(255, 255, 255, 0.6);
-            box-shadow: 0 8px 32px rgba(214, 51, 108, 0.15);
-            padding: 28px 22px;
-            text-align: center;
-            transition: transform 0.4s ease, box-shadow 0.4s ease;
-            animation: fadeSlideUp 1.6s ease;
-            position: relative;
-            z-index: 1;
-            margin-bottom: 20px;
-        }
-        .glass-card:hover {
-            transform: translateY(-8px) scale(1.02);
-            box-shadow: 0 16px 40px rgba(214, 51, 108, 0.28);
-        }
-        .glass-card h3 {
-            font-family: 'Playfair Display', serif;
-            color: #c2185b;
-            margin-bottom: 8px;
-        }
-        .glass-card p {
-            color: #8a3a55;
-            font-size: 0.95em;
-        }
-
-        /* ---------- Buttons (Streamlit native override) ---------- */
-        div.stButton > button {
-            background: linear-gradient(135deg, #ffb6c1, #ff8fab, #e75480);
-            color: white;
-            font-family: 'Poppins', sans-serif;
-            font-weight: 600;
-            border: 2px solid rgba(255, 215, 0, 0.35);
-            border-radius: 40px;
-            padding: 12px 34px;
-            box-shadow: 0 6px 20px rgba(231, 84, 128, 0.35);
-            transition: all 0.35s ease;
-            letter-spacing: 0.5px;
-        }
-        div.stButton > button:hover {
-            transform: translateY(-4px) scale(1.04);
-            box-shadow: 0 0 25px rgba(255, 182, 213, 0.9), 0 10px 25px rgba(231, 84, 128, 0.4);
-            border-color: gold;
-            color: white;
-        }
-        div.stButton > button:active {
-            transform: scale(0.97);
-        }
-
-        /* ---------- Nav bar ---------- */
-        .navbar {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            padding: 14px 10px;
-            margin-bottom: 10px;
-            flex-wrap: wrap;
-        }
-
-        /* ---------- Envelope ---------- */
-        .envelope-wrap {
-            display: flex;
-            justify-content: center;
-            margin: 30px auto;
-            animation: fadeSlideUp 1.8s ease;
-        }
-        .envelope {
-            width: 300px;
-            height: 200px;
-            background: linear-gradient(135deg, #fff0f5, #ffe0eb);
-            border-radius: 14px;
-            position: relative;
-            box-shadow: 0 15px 35px rgba(214, 51, 108, 0.25);
-            border: 2px solid #ffd1dc;
-        }
-        .envelope::before {
-            content: "";
-            position: absolute;
-            top: 0; left: 0;
-            width: 0; height: 0;
-            border-left: 150px solid transparent;
-            border-right: 150px solid transparent;
-            border-top: 110px solid #ffc2d6;
-        }
-        .seal {
-            position: absolute;
-            top: 78px; left: 50%;
-            transform: translateX(-50%);
-            width: 50px; height: 50px;
-            background: radial-gradient(circle at 35% 35%, #ff8fab, #c2185b);
-            border-radius: 50%;
-            box-shadow: 0 4px 10px rgba(194, 24, 91, 0.5);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 22px;
-            animation: glowPulse 2.4s ease-in-out infinite;
-        }
-        @keyframes glowPulse {
-            0%, 100% { box-shadow: 0 0 10px rgba(255, 143, 171, 0.6); }
-            50% { box-shadow: 0 0 25px rgba(255, 143, 171, 1); }
-        }
-
-        /* ---------- Letter paper ---------- */
-        .letter-paper {
-            background: repeating-linear-gradient(#fff6f9, #fff6f9 34px, #ffe3ec 35px);
-            border-radius: 18px;
-            padding: 45px 40px;
-            max-width: 700px;
-            margin: 20px auto;
-            box-shadow: 0 12px 35px rgba(214, 51, 108, 0.2);
-            border: 1px solid #ffd1dc;
-            animation: fadeSlideUp 1.6s ease;
-        }
-        .letter-paper p {
-            font-family: 'Dancing Script', cursive;
-            font-size: 1.5em;
-            color: #7a2e46;
-            line-height: 1.8;
-        }
-
-        /* ---------- Fade line reveal ---------- */
-        .reveal-line {
-            font-family: 'Dancing Script', cursive;
-            font-size: 1.8em;
-            text-align: center;
-            color: #ad1457;
-            opacity: 0;
-            animation: fadeSlideUp 1.4s ease forwards;
-        }
-        .reveal-line.d1 { animation-delay: 0.2s; }
-        .reveal-line.d2 { animation-delay: 1.1s; }
-        .reveal-line.d3 { animation-delay: 2.0s; }
-        .reveal-line.d4 { animation-delay: 2.9s; }
-
-        hr.dreamy {
-            border: none;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, #e75480, transparent);
-            margin: 30px 0;
-        }
-        </style>
-        """,
-        unsafe_allow_html=True,
-    )
-
-
-# ----------------------------------------------------------------------------
-# NAVIGATION BAR
-# ----------------------------------------------------------------------------
-def render_navbar():
-    labels = {
-        "welcome": "🌸 Welcome",
-        "hurt": "🥺 I Know",
-        "friendship": "🦋 Us",
-        "letter": "💌 Letter",
-        "wait": "🌷 Time",
-    }
-    cols = st.columns(len(labels))
-    for col, (key, label) in zip(cols, labels.items()):
-        with col:
-            if st.button(label, key=f"nav_{key}", use_container_width=True):
-                go_to(key)
-    st.markdown("<hr class='dreamy'>", unsafe_allow_html=True)
-
-
-# ----------------------------------------------------------------------------
-# PAGE 1 — WELCOME
-# ----------------------------------------------------------------------------
-def page_welcome():
-    floating_layer(["✨", "💗", "🌸", "☁️", "🎀"], count=20)
-    st.markdown("<div style='height:40px'></div>", unsafe_allow_html=True)
-    st.markdown("<h1 class='dream-title' style='font-size:3.2em;'>Hey Ruhii... 🌸</h1>", unsafe_allow_html=True)
-    st.markdown(
-        "<p class='script-quote' style='font-size:1.6em;'>"
-        "\"I made a tiny little world for someone very special.\"</p>",
-        unsafe_allow_html=True,
-    )
-    st.markdown("<div style='height:35px'></div>", unsafe_allow_html=True)
-    c1, c2, c3 = st.columns([1, 1, 1])
-    with c2:
-        if st.button("Enter My World ✨", use_container_width=True):
-            go_to("hurt")
-    st.markdown("<div style='height:60px'></div>", unsafe_allow_html=True)
-    st.markdown(
-        "<p class='soft-para'>🌙 a soft glowing moon watches quietly over a world made of pink clouds "
-        "and glitter rain, waiting for you to step inside...</p>",
-        unsafe_allow_html=True,
-    )
-
-
-# ----------------------------------------------------------------------------
-# PAGE 2 — I KNOW I HURT YOU
-# ----------------------------------------------------------------------------
-def page_hurt():
-    floating_layer(["🌸", "❤️", "🥀", "💮"], count=16)
-    st.markdown("<h1 class='dream-title' style='font-size:2.6em;'>I Know You're Angry... 🥺</h1>", unsafe_allow_html=True)
-    st.markdown("<div style='height:20px'></div>", unsafe_allow_html=True)
-
-    st.markdown("<p class='reveal-line d1'>You trusted me with something important. 🌷</p>", unsafe_allow_html=True)
-    st.markdown("<p class='reveal-line d2'>You asked me to keep it a secret.</p>", unsafe_allow_html=True)
-    st.markdown("<p class='reveal-line d3'>And I told the same person you asked me not to.</p>", unsafe_allow_html=True)
-    st.markdown("<p class='reveal-line d4'>I was wrong — and I'm not making any excuses for it.</p>", unsafe_allow_html=True)
-
-    st.markdown("<div style='height:40px'></div>", unsafe_allow_html=True)
-    c1, c2, c3 = st.columns([1, 1, 1])
-    with c2:
-        if st.button("Continue to Our Story 🦋", use_container_width=True):
-            go_to("friendship")
-
-
-# ----------------------------------------------------------------------------
-# PAGE 3 — OUR FRIENDSHIP
-# ----------------------------------------------------------------------------
-def page_friendship():
-    floating_layer(["🦋", "💗", "✨", "🌙"], count=16)
-    st.markdown("<h1 class='dream-title' style='font-size:2.6em;'>Our Friendship 🦋</h1>", unsafe_allow_html=True)
-    st.markdown("<div style='height:20px'></div>", unsafe_allow_html=True)
-
-    memories = [
-        ("🌸", "First Memory", "The moment this friendship quietly began."),
-        ("💗", "The Funniest Moment", "The one we still laugh about randomly."),
-        ("🦋", "A Smile I Still Remember", "A tiny moment that stayed with me."),
-        ("🌙", "Our Favorite Conversation", "The talk that felt like it lasted forever."),
-    ]
-
-    cols = st.columns(2)
-    for i, (emoji, title, desc) in enumerate(memories):
-        with cols[i % 2]:
-            st.markdown(
-                f"""
-                <div class="glass-card">
-                    <h3>{emoji} {title}</h3>
-                    <p>{desc}</p>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
-
-    st.markdown(
-        "<p class='script-quote' style='font-size:1.9em; margin-top:20px;'>"
-        "\"Some people slowly become home.\"</p>",
-        unsafe_allow_html=True,
-    )
-
-    st.markdown("<div style='height:30px'></div>", unsafe_allow_html=True)
-    c1, c2, c3 = st.columns([1, 1, 1])
-    with c2:
-        if st.button("Read My Letter 💌", use_container_width=True):
-            go_to("letter")
-
-
-# ----------------------------------------------------------------------------
-# PAGE 4 — MY LETTER
-# ----------------------------------------------------------------------------
-def page_letter():
-    floating_layer(["💌", "🌹", "✨", "🦋"], count=14)
-    st.markdown("<h1 class='dream-title' style='font-size:2.6em;'>My Letter 💌</h1>", unsafe_allow_html=True)
-
-    if not st.session_state.letter_open:
-        st.markdown(
-            """
-            <div class="envelope-wrap">
-                <div class="envelope">
-                    <div class="seal">🌹</div>
-                </div>
+# -------------------------------------------------------------
+# PAGE 1 — DREAMY WELCOME
+# -------------------------------------------------------------
+if st.session_state.page == "🌸 Dreamy Welcome":
+    st.markdown("""
+        <div style="text-align: center; padding: 40px 0;">
+            <div class="floating-sticker" style="font-size: 4rem;">🌸 ✨ 🌙</div>
+            <h1 style="font-size: 4.5rem; margin-bottom: 10px;">Hey Ruhii... 🌸</h1>
+            <div class="glass-card" style="max-width: 700px; margin: 0 auto 30px auto;">
+                <p class="handwriting">"I made a tiny little world for someone very special."</p>
+                <p style="font-size: 1.1rem; color: #8A3B4E;">A place of soft thoughts, quiet honesty, and cherished memories.</p>
             </div>
-            """,
-            unsafe_allow_html=True,
-        )
-        st.markdown("<div style='height:20px'></div>", unsafe_allow_html=True)
-        c1, c2, c3 = st.columns([1, 1, 1])
-        with c2:
-            if st.button("Open the Letter 💌", use_container_width=True):
-                st.session_state.letter_open = True
+        </div>
+    """, unsafe_allow_html=True)
+
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        if st.button("Enter My World ✨"):
+            log_click_event("Button: Enter My World ✨", "🌸 Dreamy Welcome")
+            record_page_transition("🥺 I Know I Hurt You")
+            st.rerun()
+
+# -------------------------------------------------------------
+# PAGE 2 — I KNOW I HURT YOU
+# -------------------------------------------------------------
+elif st.session_state.page == "🥺 I Know I Hurt You":
+    st.markdown("""
+        <div style="text-align: center; padding: 20px 0;">
+            <div style="font-size: 3rem;">🥺 🌧️ 🕊️</div>
+            <h1 style="font-size: 3.8rem;">I Know You're Angry... 🥺</h1>
+        </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("""
+        <div class="glass-card">
+            <p style="font-size: 1.3rem; line-height: 1.8;">
+                🌸 <b>You trusted me</b> with your thoughts and privacy.<br><br>
+                🤍 <b>You asked me to keep something secret</b> between us.<br><br>
+                💔 <b>I told the same person</b> without thinking properly.<br><br>
+                🌧️ <b>I was completely wrong</b> for doing that.<br><br>
+                🕊️ <b>No excuses.</b> No shifting blame. Just pure regret.
+            </p>
+        </div>
+    """, unsafe_allow_html=True)
+
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        if st.button("See Our Friendship Memories 💗"):
+            log_click_event("Button: See Our Friendship Memories 💗", "🥺 I Know I Hurt You")
+            record_page_transition("💗 Our Friendship")
+            st.rerun()
+
+# -------------------------------------------------------------
+# PAGE 3 — OUR FRIENDSHIP
+# -------------------------------------------------------------
+elif st.session_state.page == "💗 Our Friendship":
+    st.markdown("""
+        <div style="text-align: center; padding: 20px 0;">
+            <div style="font-size: 3rem;">💖 🦋 🌙</div>
+            <h1 style="font-size: 3.8rem;">Our Friendship 💗</h1>
+            <p style="font-size: 1.2rem; color: #7A2B3E;">Every smile, secret, and story we shared holds an irreplaceable place.</p>
+        </div>
+    """, unsafe_allow_html=True)
+
+    col1, col2 = st.columns(2)
+    with col1:
+        st.markdown("""
+            <div class="glass-card">
+                <h3>🌸 First Memory</h3>
+                <p><b>Where it all began:</b> The day we first started talking and realized we share the exact same crazy vibe and comfort.</p>
+            </div>
+            <div class="glass-card">
+                <h3>🦋 A Smile I Still Remember</h3>
+                <p><b>Pure warmth:</b> Your genuine smile and laughter when everything felt light and right.</p>
+            </div>
+        """, unsafe_allow_html=True)
+
+    with col2:
+        st.markdown("""
+            <div class="glass-card">
+                <h3>💗 The Funniest Moment</h3>
+                <p><b>Uncontrollable laughter:</b> That inside joke we couldn't stop laughing about for days on end!</p>
+            </div>
+            <div class="glass-card">
+                <h3>🌙 Our Favorite Conversation</h3>
+                <p><b>Late night secrets:</b> Conversations where time completely stopped and we talked about life.</p>
+            </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("""
+        <div class="glass-card" style="text-align: center;">
+            <p class="handwriting">"Some people slowly become home."</p>
+        </div>
+    """, unsafe_allow_html=True)
+
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        if st.button("Read My Letter 💌"):
+            log_click_event("Button: Read My Letter 💌", "💗 Our Friendship")
+            record_page_transition("💌 My Letter")
+            st.rerun()
+
+# -------------------------------------------------------------
+# PAGE 4 — MY LETTER
+# -------------------------------------------------------------
+elif st.session_state.page == "💌 My Letter":
+    st.markdown("""
+        <div style="text-align: center; padding: 20px 0;">
+            <div style="font-size: 3rem;">🎀 🌹 ✉️</div>
+            <h1 style="font-size: 3.8rem;">My Letter To You 💌</h1>
+        </div>
+    """, unsafe_allow_html=True)
+
+    if not st.session_state.letter_opened:
+        st.markdown("""
+            <div class="glass-card" style="text-align: center; padding: 50px;">
+                <div style="font-size: 4rem;">🎀 🪙 🌹</div>
+                <h2 style="font-size: 2.5rem;">To: Dearest Ruhii 🌸</h2>
+                <p style="font-size: 1.1rem; color: #8A3B4E;">Sealed with sincerity & care</p>
+            </div>
+        """, unsafe_allow_html=True)
+
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2:
+            if st.button("Open the Letter 💌"):
+                log_click_event("Button: Open the Letter 💌", "💌 My Letter")
+                st.session_state.letter_opened = True
                 st.rerun()
     else:
-        st.markdown(
-            """
-            <div class="letter-paper">
-                <p>Dear Ruhii,</p>
-                <p>I broke your trust, and I know that's not something small.</p>
-                <p>This isn't the first time I've made a mistake — and I understand
-                why this time feels different, why it hurts more, why it's harder
-                to just let go.</p>
-                <p>I'm not asking you to forgive me right now. I don't expect that,
-                and I don't think I deserve it yet.</p>
-                <p>I just want the chance to earn your trust back — slowly,
-                honestly, through actions and not words.</p>
-                <p>Take all the time you need. I'll still be here.</p>
-                <p>With love,<br>Hassan 🤍</p>
+        st.markdown("""
+            <div class="glass-card" style="background: rgba(255, 245, 248, 0.95); border: 2px solid #E6B8B8;">
+                <h2 style="font-size: 2.5rem; margin-bottom: 20px;">Dear Ruhii,</h2>
+                <div class="letter-text">
+                    <p>I want to apologize from the bottom of my heart. I broke your trust when you asked me to keep something confidential, and I failed you by telling the same person.</p>
+                    <p>This isn't my first mistake, and I completely understand why this time feels different to you. Your disappointment is valid, and I am not here to make excuses.</p>
+                    <p>I am not asking for instant forgiveness. Real trust is built through consistency and actions, not just words.</p>
+                    <p>Please take all the time and space you need. I value our bond too much to ever dismiss your feelings.</p>
+                </div>
+                <br>
+                <p class="handwriting" style="text-align: right;">— Hassan 🤍</p>
             </div>
-            """,
-            unsafe_allow_html=True,
-        )
-        st.markdown("<div style='height:20px'></div>", unsafe_allow_html=True)
-        c1, c2, c3 = st.columns([1, 1, 1])
-        with c2:
-            if st.button("Take Your Time 🌷", use_container_width=True):
-                go_to("wait")
+        """, unsafe_allow_html=True)
 
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2:
+            if st.button("Go to Final Page 🌷"):
+                log_click_event("Button: Go to Final Page 🌷", "💌 My Letter")
+                record_page_transition("🌷 Take Your Time")
+                st.rerun()
 
-# ----------------------------------------------------------------------------
+# -------------------------------------------------------------
 # PAGE 5 — TAKE YOUR TIME
-# ----------------------------------------------------------------------------
-def page_wait():
-    floating_layer(["🌸", "🏮", "✨", "🦋", "🕊️"], count=18)
-    st.markdown("<h1 class='dream-title' style='font-size:2.8em;'>Take Your Time, Ruhii 🌷</h1>", unsafe_allow_html=True)
-    st.markdown("<div style='height:15px'></div>", unsafe_allow_html=True)
+# -------------------------------------------------------------
+elif st.session_state.page == "🌷 Take Your Time":
+    st.markdown("""
+        <div style="text-align: center; padding: 20px 0;">
+            <div style="font-size: 3rem;">🏮 ✨ 🦋</div>
+            <h1 style="font-size: 3.8rem;">Take Your Time, Ruhii 🌷</h1>
+        </div>
+    """, unsafe_allow_html=True)
 
-    st.markdown("<p class='reveal-line d1'>No pressure.</p>", unsafe_allow_html=True)
-    st.markdown("<p class='reveal-line d2'>No expectations.</p>", unsafe_allow_html=True)
-    st.markdown("<p class='reveal-line d3'>Just a sincere sorry.</p>", unsafe_allow_html=True)
-    st.markdown("<p class='reveal-line d4' style='font-size:2.2em;'>— Hassan 🤍</p>", unsafe_allow_html=True)
+    st.markdown("""
+        <div class="glass-card" style="text-align: center; padding: 40px;">
+            <p style="font-size: 2.2rem; font-family: 'Cormorant Garamond', serif;">No pressure.</p>
+            <p style="font-size: 2.2rem; font-family: 'Cormorant Garamond', serif;">No expectations.</p>
+            <p style="font-size: 2.5rem; font-family: 'Cormorant Garamond', serif; font-weight: bold; color: #9E2A4B;">Just a sincere sorry.</p>
+            <br>
+            <p class="handwriting">— Hassan 🤍</p>
+        </div>
+    """, unsafe_allow_html=True)
 
-    st.markdown("<div style='height:35px'></div>", unsafe_allow_html=True)
-    c1, c2, c3 = st.columns([1, 1, 1])
-    with c2:
-        if st.button("Send My Wish ✨", use_container_width=True):
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        if st.button("Send My Wish ✨"):
+            log_click_event("Button: Send My Wish ✨", "🌷 Take Your Time")
             st.session_state.wish_sent = True
+            st.balloons()
+
+    # Optional Message Form
+    st.markdown("### 💌 Leave A Message Back (Optional)")
+    with st.form(key="ruhii_note_form"):
+        user_note_input = st.text_area("Write a message or thought to Hassan...", placeholder="Type your message here...")
+        submit_note = st.form_submit_button("Send Note Back to Hassan 🤍")
+        if submit_note and user_note_input.strip():
+            log_click_event("Submitted Note Back to Hassan", "🌷 Take Your Time")
+            log_user_note(user_note_input.strip())
+            st.session_state.note_sent_confirm = True
+
+    if st.session_state.get("note_sent_confirm", False):
+        st.success("Thank you Ruhii! Your note has been securely received by Hassan 🤍")
 
     if st.session_state.wish_sent:
-        floating_layer(["❤️", "✨", "💖"], count=26, css_class="floaty")
-        st.markdown(
-            "<p class='script-quote' style='font-size:1.6em; margin-top:30px;'>"
-            "\"I hope one day this hurt becomes just one small chapter of a "
-            "friendship that grew stronger.\"</p>",
-            unsafe_allow_html=True,
-        )
-
-
-# ----------------------------------------------------------------------------
-# MAIN
-# ----------------------------------------------------------------------------
-def main():
-    inject_global_css()
-    render_navbar()
-
-    page = st.session_state.page
-    if page == "welcome":
-        page_welcome()
-    elif page == "hurt":
-        page_hurt()
-    elif page == "friendship":
-        page_friendship()
-    elif page == "letter":
-        page_letter()
-    elif page == "wait":
-        page_wait()
-
-
-if __name__ == "__main__":
-    main()
+        st.markdown("""
+            <div class="glass-card" style="text-align: center; margin-top: 20px; border: 2px solid #FFB6C1;">
+                <div style="font-size: 2.5rem;">🌸 💖 ✨</div>
+                <p class="handwriting">
+                    "I hope one day this hurt becomes just one small chapter of a friendship that grew stronger."
+                </p>
+            </div>
+        """, unsafe_allow_html=True)
