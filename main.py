@@ -365,7 +365,7 @@ elif st.session_state.page == "🥺 I Know I Hurt You":
                 🌸 <b>Tumne mujh par bharosa kiya tha</b> apni private baat ke sath.<br><br>
                 🤍 <b>Tumne mujhe kaha tha ke yeh baat secret rakhoon</b> humare beech.<br><br>
                 💔 <b>Main ne bagair soche woh baat batadi</b> usi shakhs ko.<br><br>
-                🌧️ <b>Meri ghalti thi</b> aur main bilkul ghalat tha.<br><br>
+                ❤️‍🩹<b>Meri ghalti thi</b> aur main bilkul ghalat tha.<br><br>
                 🕊️ <b>Koi bahana nahi.</b> Koi safai nahi. Sirf dil se pachtawa hai.
             </p>
         </div>
@@ -463,6 +463,9 @@ elif st.session_state.page == "💌 My Letter":
                     <p>Yeh meri pehli ghalti nahi hai, aur main achi tarah samajhta hoon ke is baar tumhein kyun itna dukh hua hai. Tumhara naraz hona bilkul sahi hai, aur main koi bahana nahi banaunga.</p>
                     <p>Main yeh nahi keh raha ke mujhe abhi maaf kar do. Sacha bharosa lafzon se nahi, balki badle hue amal se banta hai.</p>
                     <p>Jitna waqt aur space tumhein chahiye, bilkul lo. Main humare rishte ki bohat qadar karta hoon.</p>
+                     <p>اےدوست!!!
+دوستی تو ہمیشہ تم سے ہی رہے گی پھر چاہے تم
+ناراض ہو،بے رخمی دکھاؤ،خاموش ہو جاؤ، یا بھول جاؤ</p>
                 </div>
                 <br>
                 <p class="handwriting" style="text-align: right;">— Hassan 🤍</p>
@@ -505,7 +508,7 @@ elif st.session_state.page == "🌷 Take Your Time":
             st.balloons()
 
     # Message Form
-    st.markdown("### 💌 Hassan Ko Koi Paigham Bhejo (Aapki Marzi)")
+    st.markdown("### 💌 Hassan Ko Koi Paigham Bhejo ")
     user_note_input = st.text_area("Apna paigham ya baat yahan likhein...", placeholder="Yahan likhein...", key="ruhii_note_area")
     if st.button("Hassan Ko Paigham Bhejo 🤍", key="btn_submit_ruhii_note"):
         if user_note_input.strip():
