@@ -1,13 +1,8 @@
-```python
 import streamlit as st
-import random
-import time
 
 # ============================================================
 # MIDNIGHT AURORA — FOR RUHII
 # Complete single-file Streamlit website
-# Python + Streamlit + HTML/CSS
-# No JavaScript
 # ============================================================
 
 st.set_page_config(
@@ -51,18 +46,10 @@ body {
     overflow-x: hidden;
 }
 
-/* Hide Streamlit UI */
-#MainMenu {
-    visibility: hidden;
-}
-
-footer {
-    visibility: hidden;
-}
-
-header {
-    background: transparent !important;
-}
+/* Hide Streamlit Default UI elements */
+#MainMenu { visibility: hidden; }
+footer { visibility: hidden; }
+header { background: transparent !important; }
 
 /* ============================================================
    STAR FIELD
@@ -121,7 +108,7 @@ header {
 }
 
 /* ============================================================
-   AURORA
+   AURORA GLOWS
    ============================================================ */
 
 .aurora {
@@ -179,12 +166,7 @@ header {
     position: fixed;
     width: 120px;
     height: 1px;
-    background: linear-gradient(
-        90deg,
-        transparent,
-        rgba(255,255,255,.9),
-        transparent
-    );
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.9), transparent);
     transform: rotate(-35deg);
     animation: shooting 8s linear infinite;
     opacity: 0;
@@ -204,20 +186,10 @@ header {
 }
 
 @keyframes shooting {
-    0% {
-        transform: translate(0,0) rotate(-35deg);
-        opacity: 0;
-    }
-    5% {
-        opacity: 1;
-    }
-    20% {
-        transform: translate(120vw,80vh) rotate(-35deg);
-        opacity: 0;
-    }
-    100% {
-        opacity: 0;
-    }
+    0% { transform: translate(0,0) rotate(-35deg); opacity: 0; }
+    5% { opacity: 1; }
+    20% { transform: translate(120vw,80vh) rotate(-35deg); opacity: 0; }
+    100% { opacity: 0; }
 }
 
 /* ============================================================
@@ -227,39 +199,18 @@ header {
 .main-content {
     position: relative;
     z-index: 5;
-    max-width: 1100px;
+    max-width: 1000px;
     margin: auto;
     padding: 20px;
 }
 
-/* ============================================================
-   HERO
-   ============================================================ */
-
+/* HERO SECTION */
 .hero {
-    min-height: 94vh;
+    min-height: 90vh;
     display: flex;
     align-items: center;
     justify-content: center;
     text-align: center;
-    position: relative;
-}
-
-.hero-inner {
-    animation: heroEnter 2s ease forwards;
-}
-
-@keyframes heroEnter {
-    from {
-        opacity: 0;
-        transform: translateY(40px) scale(.96);
-        filter: blur(8px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-        filter: blur(0);
-    }
 }
 
 .eyebrow {
@@ -276,13 +227,7 @@ header {
     font-weight: 500;
     line-height: .9;
     margin: 0;
-    background: linear-gradient(
-        110deg,
-        #ffffff,
-        #d8b4fe,
-        #67e8f9,
-        #ffffff
-    );
+    background: linear-gradient(110deg, #ffffff, #d8b4fe, #67e8f9, #ffffff);
     background-size: 300% 300%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -298,14 +243,14 @@ header {
 .hero-sub {
     max-width: 600px;
     margin: 35px auto;
-    color: rgba(255,255,255,.68);
+    color: rgba(255,255,255,.70);
     font-size: 17px;
     line-height: 1.9;
     font-weight: 300;
 }
 
 .scroll-hint {
-    margin-top: 70px;
+    margin-top: 60px;
     color: rgba(255,255,255,.35);
     font-size: 11px;
     letter-spacing: 4px;
@@ -318,481 +263,278 @@ header {
     50% { transform: translateY(12px); }
 }
 
-/* ============================================================
-   SECTION
-   ============================================================ */
-
+/* SECTIONS */
 .section {
-    padding: 120px 0;
-    position: relative;
+    padding: 90px 0;
 }
 
 .section-label {
     color: #a78bfa;
     text-transform: uppercase;
     letter-spacing: 5px;
-    font-size: 10px;
+    font-size: 11px;
     margin-bottom: 16px;
+    font-weight: 600;
 }
 
 .section-title {
     font-family: 'Cormorant Garamond', serif;
-    font-size: clamp(42px, 7vw, 75px);
+    font-size: clamp(38px, 6vw, 68px);
     font-weight: 500;
-    line-height: 1;
-    margin-bottom: 35px;
+    line-height: 1.1;
+    margin-bottom: 30px;
+    color: #ffffff;
 }
 
 .section-text {
     max-width: 760px;
-    color: rgba(255,255,255,.65);
+    color: rgba(255,255,255,.70);
     line-height: 2;
     font-size: 16px;
 }
 
-/* ============================================================
-   GLASS CARD
-   ============================================================ */
-
+/* GLASS CARDS */
 .glass {
-    background: linear-gradient(
-        135deg,
-        rgba(255,255,255,.075),
-        rgba(255,255,255,.025)
-    );
-    border: 1px solid rgba(255,255,255,.10);
+    background: linear-gradient(135deg, rgba(255,255,255,.075), rgba(255,255,255,.025));
+    border: 1px solid rgba(255,255,255,.12);
     backdrop-filter: blur(22px);
     -webkit-backdrop-filter: blur(22px);
-    border-radius: 28px;
-    padding: 42px;
-    box-shadow:
-        0 25px 70px rgba(0,0,0,.35),
-        inset 0 1px rgba(255,255,255,.08);
-    transition: .5s ease;
+    border-radius: 24px;
+    padding: 38px;
+    box-shadow: 0 25px 70px rgba(0,0,0,.35);
+    transition: .4s ease;
 }
 
 .glass:hover {
-    transform: translateY(-8px);
-    border-color: rgba(167,139,250,.35);
-    box-shadow:
-        0 30px 80px rgba(124,58,237,.18),
-        inset 0 1px rgba(255,255,255,.12);
+    border-color: rgba(167,139,250,.4);
 }
 
-/* ============================================================
-   BIG QUOTE
-   ============================================================ */
-
+/* QUOTE CARD */
 .quote-card {
-    margin: 50px 0;
+    margin: 40px 0;
     text-align: center;
     position: relative;
     overflow: hidden;
 }
 
-.quote-card::before {
-    content: "";
-    position: absolute;
-    width: 250px;
-    height: 250px;
-    background: #7c3aed;
-    filter: blur(100px);
-    opacity: .12;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%,-50%);
-}
-
 .quote {
-    position: relative;
     font-family: 'Playfair Display', serif;
-    font-size: clamp(24px, 4vw, 42px);
+    font-size: clamp(22px, 3.5vw, 38px);
     line-height: 1.55;
     font-style: italic;
     color: #f5f3ff;
 }
 
-/* ============================================================
-   TIMELINE
-   ============================================================ */
-
+/* TIMELINE */
 .timeline {
     position: relative;
-    margin-top: 70px;
+    margin-top: 50px;
+    padding-left: 50px;
 }
 
 .timeline-line {
     position: absolute;
-    left: 24px;
-    top: 0;
-    bottom: 0;
-    width: 1px;
-    background: linear-gradient(
-        to bottom,
-        transparent,
-        #8b5cf6,
-        #22d3ee,
-        transparent
-    );
+    left: 20px;
+    top: 10px;
+    bottom: 10px;
+    width: 2px;
+    background: linear-gradient(to bottom, #8b5cf6, #22d3ee, transparent);
 }
 
 .timeline-item {
     position: relative;
-    padding-left: 70px;
-    margin-bottom: 65px;
+    margin-bottom: 45px;
 }
 
 .timeline-dot {
     position: absolute;
-    left: 16px;
-    top: 3px;
-    width: 17px;
-    height: 17px;
+    left: -38px;
+    top: 5px;
+    width: 16px;
+    height: 16px;
     border-radius: 50%;
     background: #0b0715;
-    border: 1px solid #a78bfa;
-    box-shadow:
-        0 0 15px rgba(167,139,250,.8),
-        0 0 35px rgba(34,211,238,.25);
+    border: 2px solid #a78bfa;
+    box-shadow: 0 0 15px rgba(167,139,250,.8);
 }
 
 .timeline-title {
-    font-size: 21px;
-    margin-bottom: 10px;
+    font-size: 20px;
+    margin-bottom: 8px;
+    color: #ffffff;
+    font-weight: 500;
 }
 
 .timeline-text {
-    color: rgba(255,255,255,.55);
+    color: rgba(255,255,255,.60);
     line-height: 1.8;
 }
 
-/* ============================================================
-   PROMISE CARDS
-   ============================================================ */
-
+/* PROMISE GRID */
 .promise-grid {
     display: grid;
-    grid-template-columns: repeat(2,1fr);
-    gap: 22px;
-    margin-top: 50px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    margin-top: 40px;
 }
 
 .promise {
-    min-height: 210px;
     position: relative;
     overflow: hidden;
 }
 
 .promise-number {
     font-family: 'Cormorant Garamond', serif;
-    font-size: 70px;
-    color: rgba(167,139,250,.15);
+    font-size: 60px;
+    color: rgba(167,139,250,.20);
     position: absolute;
-    right: 22px;
+    right: 20px;
     top: 10px;
+    font-weight: 700;
 }
 
 .promise h3 {
-    position: relative;
     font-family: 'Cormorant Garamond', serif;
-    font-size: 30px;
+    font-size: 28px;
     font-weight: 500;
+    margin-bottom: 12px;
 }
 
 .promise p {
-    position: relative;
-    color: rgba(255,255,255,.55);
+    color: rgba(255,255,255,.60);
     line-height: 1.8;
+    font-size: 15px;
 }
 
-/* ============================================================
-   ENVELOPE
-   ============================================================ */
-
+/* ENVELOPE */
 .envelope-wrapper {
     display: flex;
     justify-content: center;
-    padding: 70px 0;
+    padding: 40px 0;
 }
 
 .envelope {
-    width: min(560px, 90vw);
-    min-height: 340px;
-    position: relative;
-    background: linear-gradient(
-        145deg,
-        rgba(139,92,246,.18),
-        rgba(34,211,238,.07)
-    );
-    border: 1px solid rgba(255,255,255,.12);
-    border-radius: 25px;
-    padding: 45px;
+    width: 100%;
+    max-width: 540px;
+    background: linear-gradient(145deg, rgba(139,92,246,.20), rgba(34,211,238,.08));
+    border: 1px solid rgba(255,255,255,.15);
+    border-radius: 24px;
+    padding: 40px;
     text-align: center;
-    box-shadow:
-        0 35px 100px rgba(0,0,0,.5),
-        0 0 80px rgba(124,58,237,.10);
-    animation: envelopeFloat 5s ease-in-out infinite;
-}
-
-@keyframes envelopeFloat {
-    0%,100% {
-        transform: translateY(0) rotate(0deg);
-    }
-    50% {
-        transform: translateY(-14px) rotate(.5deg);
-    }
+    box-shadow: 0 35px 100px rgba(0,0,0,.5);
 }
 
 .envelope-symbol {
-    font-size: 70px;
-    filter: drop-shadow(0 0 20px rgba(167,139,250,.5));
-    margin-bottom: 20px;
+    font-size: 60px;
+    margin-bottom: 15px;
 }
 
 .envelope h2 {
     font-family: 'Cormorant Garamond', serif;
-    font-size: 45px;
+    font-size: 42px;
     font-weight: 500;
+    margin-bottom: 10px;
 }
 
 .envelope p {
-    color: rgba(255,255,255,.55);
+    color: rgba(255,255,255,.60);
     line-height: 1.8;
 }
 
-/* ============================================================
-   LETTER
-   ============================================================ */
-
+/* LETTER */
 .letter {
-    background:
-        linear-gradient(
-            135deg,
-            rgba(255,255,255,.07),
-            rgba(167,139,250,.035)
-        );
-    border: 1px solid rgba(255,255,255,.11);
-    border-radius: 30px;
-    padding: clamp(28px, 6vw, 70px);
-    box-shadow:
-        0 30px 100px rgba(0,0,0,.4);
+    background: linear-gradient(135deg, rgba(255,255,255,.08), rgba(167,139,250,.04));
+    border: 1px solid rgba(255,255,255,.14);
+    border-radius: 28px;
+    padding: clamp(24px, 5vw, 60px);
+    margin-top: 30px;
 }
 
 .letter-title {
     font-family: 'Cormorant Garamond', serif;
-    font-size: 48px;
-    margin-bottom: 35px;
+    font-size: 45px;
+    margin-bottom: 30px;
 }
 
 .letter p {
-    color: rgba(255,255,255,.70);
+    color: rgba(255,255,255,.75);
     line-height: 2.1;
     font-size: 16px;
-    margin-bottom: 22px;
+    margin-bottom: 20px;
 }
 
 .signature {
-    margin-top: 50px;
+    margin-top: 40px;
     font-family: 'Cormorant Garamond', serif;
-    font-size: 30px;
+    font-size: 28px;
     color: #ddd6fe;
     font-style: italic;
 }
 
-/* ============================================================
-   FINAL
-   ============================================================ */
-
+/* FINAL SECTION */
 .final {
-    min-height: 90vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    padding: 100px 0 60px;
     text-align: center;
 }
 
 .final h1 {
     font-family: 'Cormorant Garamond', serif;
-    font-size: clamp(55px, 9vw, 100px);
+    font-size: clamp(48px, 8vw, 90px);
     font-weight: 500;
-    line-height: .95;
+    line-height: 1;
     margin: 20px 0;
 }
 
 .final p {
-    max-width: 650px;
+    max-width: 600px;
     margin: auto;
-    color: rgba(255,255,255,.58);
+    color: rgba(255,255,255,.65);
     line-height: 2;
 }
 
 .final-glow {
-    width: 200px;
-    height: 200px;
-    margin: 0 auto 40px;
+    width: 180px;
+    height: 180px;
+    margin: 0 auto 30px;
     border-radius: 50%;
-    background: radial-gradient(
-        circle,
-        rgba(167,139,250,.35),
-        rgba(34,211,238,.08),
-        transparent 70%
-    );
+    background: radial-gradient(circle, rgba(167,139,250,.35), rgba(34,211,238,.08), transparent 70%);
     animation: finalGlow 4s ease-in-out infinite;
 }
 
 @keyframes finalGlow {
-    0%,100% {
-        transform: scale(.9);
-        opacity: .65;
-    }
-    50% {
-        transform: scale(1.2);
-        opacity: 1;
-    }
+    0%,100% { transform: scale(.9); opacity: .65; }
+    50% { transform: scale(1.15); opacity: 1; }
 }
 
-/* ============================================================
-   BUTTON
-   ============================================================ */
-
+/* STYLING STREAMLIT BUTTON */
 .stButton > button {
-    width: 100%;
+    width: 100% !important;
+    max-width: 450px !important;
+    display: block !important;
+    margin: 20px auto !important;
     border-radius: 999px !important;
-    border: 1px solid rgba(167,139,250,.4) !important;
-    background:
-        linear-gradient(
-            100deg,
-            rgba(124,58,237,.25),
-            rgba(34,211,238,.12)
-        ) !important;
+    border: 1px solid rgba(167,139,250,.5) !important;
+    background: linear-gradient(100deg, rgba(124,58,237,.35), rgba(34,211,238,.20)) !important;
     color: white !important;
-    padding: 15px 28px !important;
-    font-family: 'Inter', sans-serif !important;
-    font-size: 14px !important;
-    letter-spacing: 1px !important;
-    transition: .4s ease !important;
-    box-shadow: 0 0 30px rgba(124,58,237,.08) !important;
+    padding: 16px 32px !important;
+    font-size: 15px !important;
+    letter-spacing: 2px !important;
+    text-transform: uppercase !important;
+    transition: .3s ease !important;
+    cursor: pointer !important;
 }
 
 .stButton > button:hover {
     transform: translateY(-3px) !important;
-    border-color: rgba(34,211,238,.6) !important;
-    box-shadow:
-        0 10px 35px rgba(124,58,237,.25),
-        0 0 40px rgba(34,211,238,.10) !important;
+    border-color: rgba(34,211,238,.8) !important;
+    box-shadow: 0 10px 30px rgba(124,58,237,.35) !important;
 }
-
-/* ============================================================
-   MUSIC BOX
-   ============================================================ */
-
-.music-box {
-    text-align: center;
-    padding: 35px;
-    border-radius: 25px;
-    background: rgba(255,255,255,.035);
-    border: 1px solid rgba(255,255,255,.08);
-}
-
-.music-icon {
-    font-size: 35px;
-    animation: musicPulse 2s infinite;
-}
-
-@keyframes musicPulse {
-    0%,100% { transform: scale(1); }
-    50% { transform: scale(1.18); }
-}
-
-/* ============================================================
-   DIVIDER
-   ============================================================ */
-
-.divider {
-    height: 1px;
-    width: 100%;
-    margin: 30px 0;
-    background: linear-gradient(
-        90deg,
-        transparent,
-        rgba(167,139,250,.4),
-        rgba(34,211,238,.4),
-        transparent
-    );
-}
-
-/* ============================================================
-   MOBILE
-   ============================================================ */
 
 @media (max-width: 700px) {
-
-    .main-content {
-        padding: 14px;
-    }
-
-    .hero {
-        min-height: 88vh;
-    }
-
-    .hero h1 {
-        font-size: 76px;
-    }
-
-    .hero-sub {
-        font-size: 14px;
-        padding: 0 15px;
-    }
-
-    .section {
-        padding: 80px 0;
-    }
-
-    .glass {
-        padding: 28px 22px;
-        border-radius: 22px;
-    }
-
-    .promise-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .promise {
-        min-height: 190px;
-    }
-
-    .timeline-item {
-        padding-left: 55px;
-    }
-
-    .timeline-line {
-        left: 18px;
-    }
-
-    .timeline-dot {
-        left: 10px;
-    }
-
-    .letter {
-        padding: 30px 22px;
-    }
-
-    .letter-title {
-        font-size: 38px;
-    }
-
-    .letter p {
-        font-size: 15px;
-        line-height: 1.9;
-    }
-
-    .envelope {
-        padding: 30px 22px;
-    }
-
-    .final {
-        min-height: 75vh;
-    }
+    .promise-grid { grid-template-columns: 1fr; }
+    .main-content { padding: 12px; }
+    .timeline { padding-left: 35px; }
+    .timeline-dot { left: -28px; }
 }
 
 </style>
@@ -800,31 +542,18 @@ header {
 
 
 # ============================================================
-# BACKGROUND ELEMENTS
+# BACKGROUND ANIMATED HTML
 # ============================================================
 
 st.markdown("""
 <div class="star-field">
-    <div class="star"></div>
-    <div class="star"></div>
-    <div class="star"></div>
-    <div class="star"></div>
-    <div class="star"></div>
-    <div class="star"></div>
-    <div class="star"></div>
-    <div class="star"></div>
-    <div class="star"></div>
-    <div class="star"></div>
-    <div class="star"></div>
-    <div class="star"></div>
-    <div class="star"></div>
-    <div class="star"></div>
-    <div class="star"></div>
-    <div class="star"></div>
-    <div class="star"></div>
-    <div class="star"></div>
-    <div class="star"></div>
-    <div class="star"></div>
+    <div class="star"></div><div class="star"></div><div class="star"></div>
+    <div class="star"></div><div class="star"></div><div class="star"></div>
+    <div class="star"></div><div class="star"></div><div class="star"></div>
+    <div class="star"></div><div class="star"></div><div class="star"></div>
+    <div class="star"></div><div class="star"></div><div class="star"></div>
+    <div class="star"></div><div class="star"></div><div class="star"></div>
+    <div class="star"></div><div class="star"></div>
 </div>
 
 <div class="aurora one"></div>
@@ -837,599 +566,243 @@ st.markdown("""
 
 
 # ============================================================
-# MAIN WRAPPER
+# CONTENT WRAPPER
 # ============================================================
 
 st.markdown('<div class="main-content">', unsafe_allow_html=True)
 
 
-# ============================================================
 # HERO
-# ============================================================
-
 st.markdown("""
 <section class="hero">
-
-<div class="hero-inner">
-
-<div class="eyebrow">
-A little something for someone important
-</div>
-
-<h1>Ruhii</h1>
-
-<div class="hero-sub">
-I know you're angry.
-And honestly… I understand why.
-<br><br>
-So this isn't here to convince you.
-It's simply here to say what I should have said properly.
-</div>
-
-<div class="scroll-hint">
-↓ &nbsp; Take your time &nbsp; ↓
-</div>
-
-</div>
-
-</section>
-""", unsafe_allow_html=True)
-
-
-# ============================================================
-# SECTION 1
-# ============================================================
-
-st.markdown("""
-<section class="section">
-
-<div class="section-label">01 / No Excuses</div>
-
-<div class="section-title">
-I won't defend myself.
-</div>
-
-<div class="glass">
-
-<p class="section-text">
-
-Ruhii, you trusted me with something that was supposed to stay between us.
-
-I should have protected that trust.
-
-Instead, I told someone I was specifically asked not to tell.
-
-There isn't a clever explanation that can make that okay.
-
-There isn't a good enough excuse.
-
-I was wrong.
-
-</p>
-
-</div>
-
-<div class="quote-card glass">
-
-<div class="quote">
-“You trusted me with something private,
-and I failed to protect it.”
-</div>
-
-</div>
-
-</section>
-""", unsafe_allow_html=True)
-
-
-# ============================================================
-# SECTION 2
-# ============================================================
-
-st.markdown("""
-<section class="section">
-
-<div class="section-label">02 / I Understand</div>
-
-<div class="section-title">
-I know why this time hurts more.
-</div>
-
-<p class="section-text">
-This wasn't the first time I made a mistake like this.
-You had already given me chances.
-You had already forgiven me.
-And somehow, I repeated something I should have learned from.
-</p>
-
-<div class="timeline">
-
-<div class="timeline-line"></div>
-
-<div class="timeline-item">
-<div class="timeline-dot"></div>
-<div class="timeline-title">You trusted me</div>
-<div class="timeline-text">
-You believed something you told me would remain safe with me.
-</div>
-</div>
-
-<div class="timeline-item">
-<div class="timeline-dot"></div>
-<div class="timeline-title">I broke that trust</div>
-<div class="timeline-text">
-I told someone what I was supposed to keep private.
-</div>
-</div>
-
-<div class="timeline-item">
-<div class="timeline-dot"></div>
-<div class="timeline-title">You forgave me before</div>
-<div class="timeline-text">
-You gave me chances that I should have valued much more.
-</div>
-</div>
-
-<div class="timeline-item">
-<div class="timeline-dot"></div>
-<div class="timeline-title">And I repeated it</div>
-<div class="timeline-text">
-That's the part I can't ignore or pretend isn't serious.
-</div>
-</div>
-
-</div>
-
-</section>
-""", unsafe_allow_html=True)
-
-
-# ============================================================
-# SECTION 3
-# ============================================================
-
-st.markdown("""
-<section class="section">
-
-<div class="section-label">03 / The Truth</div>
-
-<div class="section-title">
-Sorry isn't a reset button.
-</div>
-
-<div class="glass">
-
-<p class="section-text">
-
-I know I can write a hundred “sorry” messages.
-
-I know I can make a beautiful website.
-
-I know I can say that I won't do it again.
-
-But none of those things automatically rebuild trust.
-
-And I don't want to pretend that they do.
-
-If I ever get another chance, I want to earn that trust through what I actually do — not through what I promise tonight.
-
-</p>
-
-</div>
-
-</section>
-""", unsafe_allow_html=True)
-
-
-# ============================================================
-# SECTION 4
-# ============================================================
-
-st.markdown("""
-<section class="section">
-
-<div class="section-label">04 / Four Things</div>
-
-<div class="section-title">
-Things I should have understood.
-</div>
-
-<div class="promise-grid">
-
-<div class="promise glass">
-<div class="promise-number">01</div>
-<h3>Trust</h3>
-<p>
-Trust isn't something I get automatically just because we're close.
-It's something I have to protect.
-</p>
-</div>
-
-<div class="promise glass">
-<div class="promise-number">02</div>
-<h3>Privacy</h3>
-<p>
-If you tell me something privately,
-I should know that it belongs with me — not somewhere else.
-</p>
-</div>
-
-<div class="promise glass">
-<div class="promise-number">03</div>
-<h3>Forgiveness</h3>
-<p>
-Your forgiveness is a gift.
-It's not something I should expect simply because I apologized.
-</p>
-</div>
-
-<div class="promise glass">
-<div class="promise-number">04</div>
-<h3>Change</h3>
-<p>
-Real change isn't saying “I won't do it again.”
-It's behaving differently when the next opportunity comes.
-</p>
-</div>
-
-</div>
-
-</section>
-""", unsafe_allow_html=True)
-
-
-# ============================================================
-# SECTION 5 — ENVELOPE
-# ============================================================
-
-st.markdown("""
-<section class="section">
-
-<div class="section-label">05 / A Letter</div>
-
-<div class="section-title">
-Something I wanted you to read.
-</div>
-
-<div class="envelope-wrapper">
-
-<div class="envelope">
-
-<div class="envelope-symbol">✉️</div>
-
-<h2>For Ruhii</h2>
-
-<p>
-No pressure.
-No conditions.
-Just a letter from someone who knows he messed up.
-</p>
-
-</div>
-
-</div>
-
-</section>
-""", unsafe_allow_html=True)
-
-
-# ============================================================
-# LETTER
-# ============================================================
-
-st.markdown("""
-<section class="section">
-
-<div class="letter">
-
-<div class="section-label">
-A letter from me
-</div>
-
-<div class="letter-title">
-Ruhii…
-</div>
-
-<p>
-I don't really know whether these words can fix anything,
-and I'm not going to pretend that they can.
-</p>
-
-<p>
-You trusted me with something.
-You clearly told me not to share it.
-And I still told the same person.
-That was my mistake.
-Completely.
-</p>
-
-<p>
-What makes me feel worse is knowing that this isn't the first
-time you've had to forgive me for something similar.
-You gave me chances before, and instead of proving that I had
-learned, I repeated the same mistake.
-</p>
-
-<p>
-So I understand why you're angry.
-I understand why you're hurt.
-And I understand why “sorry” probably doesn't mean much right now.
-</p>
-
-<p>
-I'm not asking you to forget what happened.
-I'm not asking you to immediately forgive me.
-And I'm definitely not asking you to pretend everything is normal.
-</p>
-
-<p>
-I just want you to know that I genuinely regret breaking your trust.
-Not because you blocked me.
-Not because you're angry.
-But because I should have been someone you could safely trust.
-</p>
-
-<p>
-If one day you decide to give me another chance,
-I don't want that chance because of this website,
-or because I said the right words.
-</p>
-
-<p>
-I want to deserve it through my actions.
-</p>
-
-<p>
-And if you need time,
-I'll respect that too.
-</p>
-
-<p>
-I'm sorry, Ruhii.
-Really.
-</p>
-
-<div class="signature">
-— Hassan 🤍
-</div>
-
-</div>
-
-</section>
-""", unsafe_allow_html=True)
-
-
-# ============================================================
-# SECTION 6 — PROMISE
-# ============================================================
-
-st.markdown("""
-<section class="section">
-
-<div class="section-label">06 / Not A Promise To Impress You</div>
-
-<div class="section-title">
-I won't ask you to trust my words.
-</div>
-
-<div class="glass">
-
-<div class="quote">
-“I'll let my actions speak.”
-</div>
-
-<div class="divider"></div>
-
-<p class="section-text">
-
-If I ever get the opportunity again:
-
-<br><br>
-
-I will protect what you tell me.
-
-<br><br>
-
-I will understand that private means private.
-
-<br><br>
-
-I will stop treating forgiveness like a reset button.
-
-<br><br>
-
-And most importantly,
-I will understand that being your best friend is a responsibility,
-not just a title.
-
-</p>
-
-</div>
-
-</section>
-""", unsafe_allow_html=True)
-
-
-# ============================================================
-# MUSIC SECTION
-# ============================================================
-
-st.markdown("""
-<section class="section">
-
-<div class="section-label">07 / A Quiet Moment</div>
-
-<div class="music-box">
-
-<div class="music-icon">♫</div>
-
-<h3>Maybe put your favorite song here.</h3>
-
-<p style="color:rgba(255,255,255,.5); line-height:1.8;">
-If you want background music, add a royalty-free audio file
-to your project and connect it through Streamlit.
-</p>
-
-</div>
-
-</section>
-""", unsafe_allow_html=True)
-
-
-# ============================================================
-# FINAL SECTION
-# ============================================================
-
-st.markdown("""
-<section class="final">
-
 <div>
-
-<div class="final-glow"></div>
-
-<div class="section-label">
-08 / One Last Thing
+    <div class="eyebrow">A little something for someone important</div>
+    <h1>Ruhii</h1>
+    <div class="hero-sub">
+        I know you're angry.<br>
+        And honestly… I understand why.<br><br>
+        So this isn't here to convince you.<br>
+        It's simply here to say what I should have said properly.
+    </div>
+    <div class="scroll-hint">↓ &nbsp; Take your time &nbsp; ↓</div>
 </div>
-
-<h1>
-Take your time,<br>
-Ruhii.
-</h1>
-
-<p>
-I can't undo what I did.
-
-I can't force you to forgive me.
-
-And I can't demand your trust back.
-
-All I can do is accept that I hurt you,
-be genuinely sorry,
-and become better than the person who made that mistake.
-
-<br><br>
-
-Whenever you're ready.
-
-<br><br>
-
-I'm sorry. 🤍
-</p>
-
-</div>
-
 </section>
 """, unsafe_allow_html=True)
 
 
-# ============================================================
-# FINAL INTERACTION
-# ============================================================
-
+# SECTION 01
 st.markdown("""
-<div style="
-text-align:center;
-padding:60px 0 100px;
-">
-<div style="
-color:rgba(255,255,255,.25);
-font-size:11px;
-letter-spacing:4px;
-text-transform:uppercase;
-margin-bottom:25px;
-">
-No pressure. No expectations.
-</div>
-</div>
-""", unsafe_allow_html=True)
-
-
-# ============================================================
-# OPTIONAL FINAL BUTTON
-# ============================================================
-
-if st.button("🤍 I Read Everything", use_container_width=True):
-
-    st.balloons()
-
-    st.markdown("""
-    <div style="
-        text-align:center;
-        padding:60px 20px;
-        animation: heroEnter 1.5s ease;
-    ">
-
-    <div style="
-        font-family:'Cormorant Garamond',serif;
-        font-size:55px;
-        background:linear-gradient(90deg,#fff,#c4b5fd,#67e8f9,#fff);
-        -webkit-background-clip:text;
-        -webkit-text-fill-color:transparent;
-        background-size:300% 300%;
-        animation:gradientMove 5s ease infinite;
-    ">
-        Thank you, Ruhii.
+<section class="section">
+    <div class="section-label">01 / No Excuses</div>
+    <div class="section-title">I won't defend myself.</div>
+    <div class="glass">
+        <p class="section-text">
+            Ruhii, you trusted me with something that was supposed to stay between us.<br><br>
+            I should have protected that trust.<br><br>
+            Instead, I told someone I was specifically asked not to tell.<br><br>
+            There isn't a clever explanation that can make that okay.<br><br>
+            There isn't a good enough excuse.<br><br>
+            <b>I was wrong.</b>
+        </p>
     </div>
 
-    <p style="
-        color:rgba(255,255,255,.55);
-        font-size:16px;
-        line-height:2;
-        max-width:600px;
-        margin:25px auto;
-    ">
-        Whatever you decide,
-        I hope you know that this apology was meant sincerely.
-        🤍
+    <div class="quote-card glass">
+        <div class="quote">
+            “You trusted me with something private, and I failed to protect it.”
+        </div>
+    </div>
+</section>
+""", unsafe_allow_html=True)
+
+
+# SECTION 02
+st.markdown("""
+<section class="section">
+    <div class="section-label">02 / I Understand</div>
+    <div class="section-title">I know why this time hurts more.</div>
+    <p class="section-text">
+        This wasn't the first time I made a mistake like this. You had already given me chances. You had already forgiven me. And somehow, I repeated something I should have learned from.
     </p>
 
+    <div class="timeline">
+        <div class="timeline-line"></div>
+        
+        <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-title">You trusted me</div>
+            <div class="timeline-text">You believed something you told me would remain safe with me.</div>
+        </div>
+
+        <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-title">I broke that trust</div>
+            <div class="timeline-text">I told someone what I was supposed to keep private.</div>
+        </div>
+
+        <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-title">You forgave me before</div>
+            <div class="timeline-text">You gave me chances that I should have valued much more.</div>
+        </div>
+
+        <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-title">And I repeated it</div>
+            <div class="timeline-text">That's the part I can't ignore or pretend isn't serious.</div>
+        </div>
+    </div>
+</section>
+""", unsafe_allow_html=True)
+
+
+# SECTION 03
+st.markdown("""
+<section class="section">
+    <div class="section-label">03 / The Truth</div>
+    <div class="section-title">Sorry isn't a reset button.</div>
+    <div class="glass">
+        <p class="section-text">
+            I know I can write a hundred “sorry” messages.<br>
+            I know I can make a beautiful website.<br>
+            I know I can say that I won't do it again.<br>
+            But none of those things automatically rebuild trust.<br>
+            And I don't want to pretend that they do.<br><br>
+            <b>If I ever get another chance, I want to earn that trust through what I actually do — not through what I promise tonight.</b>
+        </p>
+    </div>
+</section>
+""", unsafe_allow_html=True)
+
+
+# SECTION 04
+st.markdown("""
+<section class="section">
+    <div class="section-label">04 / Four Things</div>
+    <div class="section-title">Things I should have understood.</div>
+
+    <div class="promise-grid">
+        <div class="promise glass">
+            <div class="promise-number">01</div>
+            <h3>Trust</h3>
+            <p>Trust isn't something I get automatically just because we're close. It's something I have to protect.</p>
+        </div>
+
+        <div class="promise glass">
+            <div class="promise-number">02</div>
+            <h3>Privacy</h3>
+            <p>If you tell me something privately, I should know that it belongs with me — not somewhere else.</p>
+        </div>
+
+        <div class="promise glass">
+            <div class="promise-number">03</div>
+            <h3>Forgiveness</h3>
+            <p>Your forgiveness is a gift. It's not something I should expect simply because I apologized.</p>
+        </div>
+
+        <div class="promise glass">
+            <div class="promise-number">04</div>
+            <h3>Change</h3>
+            <p>Real change isn't saying “I won't do it again.” It's behaving differently when the next opportunity comes.</p>
+        </div>
+    </div>
+</section>
+""", unsafe_allow_html=True)
+
+
+# SECTION 05 - LETTER ENVELOPE
+st.markdown("""
+<section class="section">
+    <div class="section-label">05 / A Letter</div>
+    <div class="section-title">Something I wanted you to read.</div>
+
+    <div class="envelope-wrapper">
+        <div class="envelope">
+            <div class="envelope-symbol">✉️</div>
+            <h2>For Ruhii</h2>
+            <p>No pressure. No conditions. Just a letter from someone who knows he messed up.</p>
+        </div>
+    </div>
+
+    <div class="letter">
+        <div class="section-label">A letter from me</div>
+        <div class="letter-title">Ruhii…</div>
+
+        <p>I don't really know whether these words can fix anything, and I'm not going to pretend that they can.</p>
+        <p>You trusted me with something. You clearly told me not to share it. And I still told the same person. That was my mistake. Completely.</p>
+        <p>What makes me feel worse is knowing that this isn't the first time you've had to forgive me for something similar. You gave me chances before, and instead of proving that I had learned, I repeated the same mistake.</p>
+        <p>So I understand why you're angry. I understand why you're hurt. And I understand why “sorry” probably doesn't mean much right now.</p>
+        <p>I'm not asking you to forget what happened. I'm not asking you to immediately forgive me. And I'm definitely not asking you to pretend everything is normal.</p>
+        <p>I just want you to know that I genuinely regret breaking your trust. Not because you blocked me. Not because you're angry. But because I should have been someone you could safely trust.</p>
+        <p>If one day you decide to give me another chance, I don't want that chance because of this website, or because I said the right words.</p>
+        <p><b>I want to deserve it through my actions.</b></p>
+        <p>And if you need time, I'll respect that too.</p>
+        <p>I'm sorry, Ruhii. Really.</p>
+
+        <div class="signature">— Hassan 🤍</div>
+    </div>
+</section>
+""", unsafe_allow_html=True)
+
+
+# SECTION 06 - PROMISE
+st.markdown("""
+<section class="section">
+    <div class="section-label">06 / Not A Promise To Impress You</div>
+    <div class="section-title">I won't ask you to trust my words.</div>
+
+    <div class="glass">
+        <div class="quote">“I'll let my actions speak.”</div>
+        <br>
+        <p class="section-text">
+            If I ever get the opportunity again:<br><br>
+            • I will protect what you tell me.<br><br>
+            • I will understand that private means private.<br><br>
+            • I will stop treating forgiveness like a reset button.<br><br>
+            • And most importantly, I will understand that being your best friend is a responsibility, not just a title.
+        </p>
+    </div>
+</section>
+""", unsafe_allow_html=True)
+
+
+# FINAL SECTION
+st.markdown("""
+<section class="final">
+    <div class="final-glow"></div>
+    <div class="section-label">07 / One Last Thing</div>
+    <h1>Take your time,<br>Ruhii.</h1>
+    <p>
+        I can't undo what I did.<br>
+        I can't force you to forgive me.<br>
+        And I can't demand your trust back.<br><br>
+        All I can do is accept that I hurt you, be genuinely sorry, and become better than the person who made that mistake.<br><br>
+        Whenever you're ready.<br><br>
+        <b>I'm sorry. 🤍</b>
+    </p>
+</section>
+""", unsafe_allow_html=True)
+
+
+# BUTTON INTERACTION
+if st.button("🤍 I Read Everything", use_container_width=True):
+    st.balloons()
+    st.markdown("""
+    <div style="text-align:center; padding: 40px 20px; background: rgba(139,92,246,.15); border-radius: 24px; border: 1px solid rgba(167,139,250,.4); margin-top: 30px;">
+        <div style="font-family:'Cormorant Garamond',serif; font-size:42px; color:#ffffff; margin-bottom: 15px;">
+            Thank you, Ruhii.
+        </div>
+        <p style="color:rgba(255,255,255,.70); font-size:16px; line-height:1.8; max-width:550px; margin:0 auto;">
+            Whatever you decide, I hope you know that this apology was meant sincerely. 🤍
+        </p>
     </div>
     """, unsafe_allow_html=True)
 
 
-# ============================================================
 # FOOTER
-# ============================================================
-
 st.markdown("""
-<div style="
-text-align:center;
-padding:30px 0 50px;
-color:rgba(255,255,255,.18);
-font-size:11px;
-letter-spacing:2px;
-">
-MADE WITH SINCERITY · FOR RUHII
+<div style="text-align:center; padding: 60px 0 30px; color:rgba(255,255,255,.2); font-size:11px; letter-spacing:2px;">
+    MADE WITH SINCERITY · FOR RUHII
 </div>
 """, unsafe_allow_html=True)
 
-
 st.markdown('</div>', unsafe_allow_html=True)
-```
-
-### `requirements.txt`
-
-```text
-streamlit
-```
-
-### GitHub structure
-
-```text
-Ruhii-Apology/
-├── app.py
-└── requirements.txt
-```
-
-### 🚀 Deploy
-
-1. GitHub par new repository banao: `Ruhii-Apology`
-2. `app.py` mein upar wala complete code paste karo.
-3. `requirements.txt` upload karo.
-4. Streamlit Community Cloud par repository select karo.
-5. Main file: **`app.py`**
-6. Deploy.
-
-**Ek honest limitation:** CSS animations browser mein chalengi; “100% Python-only” website ke andar browser animation engine ko Python se replace karna practical nahi hai. Is code mein **JavaScript intentionally zero** hai, aur animation/effects embedded CSS se handle ho rahe hain.
-
-Aur ek aur ruthless point 😄: **website ko aur beautiful banana easy hai; Ruhii ka trust wapas banana hard part hai.** Isliye maine design ko flashy rakha hai, lekin apology ko manipulative nahi banaya. ❤️‍🩹
