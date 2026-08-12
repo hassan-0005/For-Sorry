@@ -17,7 +17,6 @@ def load_logs():
         try:
             with open(LOG_FILE, "r") as f:
                 data = json.load(f)
-                # Merge with session state
                 for note in data.get("notes", []):
                     if note not in st.session_state.analytics_data["notes"]:
                         st.session_state.analytics_data["notes"].append(note)
@@ -203,6 +202,8 @@ if "letter_opened" not in st.session_state:
     st.session_state.letter_opened = False
 if "wish_sent" not in st.session_state:
     st.session_state.wish_sent = False
+if "view_admin_portal" not in st.session_state:
+    st.session_state.view_admin_portal = False
 if "admin_authenticated" not in st.session_state:
     st.session_state.admin_authenticated = False
 
@@ -212,70 +213,123 @@ if "page_start_time" not in st.session_state:
     st.session_state.page_start_time = time.time()
 
 # -------------------------------------------------------------
-# TOP HEADER WITH WORKING SECRET PORTAL (PERSISTENT STATE)
+# TOP HEADER WITH DISCREET SECRET PORTAL TRIGGER
 # -------------------------------------------------------------
-top_col1, top_col2 = st.columns([12, 1])
-with top_col2:
-    with st.expander("🤍"):
-        if not st.session_state.admin_authenticated:
-            secret_pass = st.text_input("Passcode", type="password", key="admin_pass_input")
-            if st.button("Unlock 🔓", key="btn_unlock_admin"):
-                if secret_pass == "hassan786" or secret_pass == "hassan123":
-                    st.session_state.admin_authenticated = True
+if not st.session_state.view_admin_portal:
+    top_col1, top_col2 = st.columns([12, 1])
+    with top_col2:
+        with st.expander("🤍"):
+            if not st.session_state.admin_authenticated:
+                secret_pass = st.text_input("Passcode", type="password", key="admin_pass_input")
+                if st.button("Unlock 🔓", key="btn_unlock_admin"):
+                    if secret_pass == "hassan786" or secret_pass == "hassan123":
+                        st.session_state.admin_authenticated = True
+                        st.session_state.view_admin_portal = True
+                        st.rerun()
+                    else:
+                        st.error("Incorrect!")
+            
+            if st.session_state.admin_authenticated:
+                if st.button("Open Full Vault 🔓", key="btn_open_vault_page"):
+                    st.session_state.view_admin_portal = True
                     st.rerun()
-                else:
-                    st.error("Incorrect!")
+
+# -------------------------------------------------------------
+# FULL DEDICATED SEPARATE PAGE — HASSAN'S SECRET VAULT
+# -------------------------------------------------------------
+if st.session_state.view_admin_portal and st.session_state.admin_authenticated:
+    # Live update duration for current page before viewing logs
+    if "page_start_time" in st.session_state and "current_tracked_page" in st.session_state:
+        current_dur = time.time() - st.session_state.page_start_time
+        log_page_duration(st.session_state.current_tracked_page, current_dur)
+        st.session_state.page_start_time = time.time()
         
-        if st.session_state.admin_authenticated:
-            st.success("Welcome Hassan 🤍 (Secret Unlocked)")
-            
-            # Update duration live
-            if "page_start_time" in st.session_state and "current_tracked_page" in st.session_state:
-                current_dur = time.time() - st.session_state.page_start_time
-                log_page_duration(st.session_state.current_tracked_page, current_dur)
-                st.session_state.page_start_time = time.time()
-                
-            logs = load_logs()
-            
-            st.markdown("#### ⏱️ Tab Duration")
-            durations = logs.get("page_durations", {})
-            if durations:
-                for page_name, seconds in durations.items():
-                    mins = round(seconds / 60, 2)
-                    st.write(f"• **{page_name}**: `{seconds}s` ({mins}m)")
-            else:
-                st.caption("No data yet.")
-                
-            st.markdown("#### 🖱️ Activity Clicks")
-            clicks = logs.get("clicks", [])
-            if clicks:
-                for c in reversed(clicks):
-                    st.caption(f"[{c['time']}] *{c['page']}* -> **{c['button']}**")
-            else:
-                st.caption("No clicks yet.")
-                
-            st.markdown("#### 💌 Ruhii's Messages (Saved)")
-            notes = logs.get("notes", [])
-            if notes:
-                for n in reversed(notes):
-                    st.write(f"💌 **[{n['time']}]**: {n['text']}")
-            else:
-                st.caption("No message saved yet.")
-                
-            col_a, col_b = st.columns(2)
-            with col_a:
-                if st.button("Lock 🔒"):
-                    st.session_state.admin_authenticated = False
-                    st.rerun()
-            with col_b:
-                if st.button("Reset All 🗑️"):
-                    clear_all_analytics()
-                    st.rerun()
+    logs = load_logs()
+
+    st.markdown("""
+        <div style="text-align: center; padding: 20px 0;">
+            <div class="floating-sticker" style="font-size: 3.5rem;">🔒 🤍 📊</div>
+            <h1 style="font-size: 3.8rem; color: #4A1525;">Hassan's Private Dashboard</h1>
+            <p style="font-size: 1.1rem; color: #8A3B4E;">Secret analytics, timestamps, and messages from Ruhii</p>
+        </div>
+    """, unsafe_allow_html=True)
+
+    col_nav1, col_nav2 = st.columns([1, 1])
+    with col_nav1:
+        if st.button("← Back to Apology App 🌸", key="btn_back_to_app"):
+            st.session_state.view_admin_portal = False
+            st.rerun()
+    with col_nav2:
+        if st.button("Lock Vault 🔒", key="btn_lock_vault"):
+            st.session_state.admin_authenticated = False
+            st.session_state.view_admin_portal = False
+            st.rerun()
+
+    st.markdown("---")
+
+    # Section 1: Time Spent on Tabs
+    st.markdown("""
+        <div class="glass-card">
+            <h3 style="font-size: 1.8rem; margin-bottom: 15px;">⏱️ Time Spent on Each Screen/Tab</h3>
+    """, unsafe_allow_html=True)
+    
+    durations = logs.get("page_durations", {})
+    if durations:
+        d_cols = st.columns(min(len(durations), 3))
+        idx = 0
+        for page_name, seconds in durations.items():
+            mins = round(seconds / 60, 2)
+            with d_cols[idx % 3]:
+                st.metric(label=f"Screen: {page_name}", value=f"{seconds} sec", delta=f"~{mins} mins")
+            idx += 1
+    else:
+        st.info("No tab duration recorded yet.")
+    st.markdown("</div>", unsafe_allow_html=True)
+
+    # Section 2: Ruhii's Messages
+    st.markdown("""
+        <div class="glass-card">
+            <h3 style="font-size: 1.8rem; margin-bottom: 15px;">💌 Messages Received From Ruhii</h3>
+    """, unsafe_allow_html=True)
+    
+    notes = logs.get("notes", [])
+    if notes:
+        for n in reversed(notes):
+            st.markdown(f"""
+                <div style="background: rgba(255, 255, 255, 0.9); padding: 18px; border-radius: 16px; border-left: 5px solid #FF8DA1; margin-bottom: 12px;">
+                    <span style="font-size: 0.85rem; color: #8A3B4E; font-weight: bold;">🕒 Sent At: {n['time']}</span>
+                    <p style="font-size: 1.4rem; color: #4A1525; margin-top: 8px; font-family: 'Caveat', cursive;">"{n['text']}"</p>
+                </div>
+            """, unsafe_allow_html=True)
+    else:
+        st.info("No message submitted by Ruhii yet.")
+    st.markdown("</div>", unsafe_allow_html=True)
+
+    # Section 3: Click Activity Timeline
+    st.markdown("""
+        <div class="glass-card">
+            <h3 style="font-size: 1.8rem; margin-bottom: 15px;">🖱️ Activity & Button Clicks Timeline</h3>
+    """, unsafe_allow_html=True)
+    
+    clicks = logs.get("clicks", [])
+    if clicks:
+        for c in reversed(clicks):
+            st.write(f"• **[{c['time']}]** on screen *{c['page']}* -> clicked **{c['button']}**")
+    else:
+        st.info("No button clicks recorded yet.")
+    st.markdown("</div>", unsafe_allow_html=True)
+
+    if st.button("🗑️ Clear All Saved Analytics"):
+        clear_all_analytics()
+        st.success("All analytics reset!")
+        st.rerun()
+
+    st.stop()
 
 # -------------------------------------------------------------
 # PAGE 1 — DREAMY WELCOME
 # -------------------------------------------------------------
-if st.session_state.page == "🌸 Dreamy Welcome":
+elif st.session_state.page == "🌸 Dreamy Welcome":
     st.markdown("""
         <div style="text-align: center; padding: 40px 0;">
             <div class="floating-sticker" style="font-size: 4rem;">🌸 ✨ 🌙</div>
