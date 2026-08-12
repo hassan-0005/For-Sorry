@@ -365,7 +365,7 @@ elif st.session_state.page == "🌸 Dreamy Welcome":
             <h1 style="font-size: 4.5rem; margin-bottom: 10px;">Hey Ruhii... 🌸</h1>
             <div class="glass-card" style="max-width: 700px; margin: 0 auto 30px auto;">
                 <p class="handwriting">"Main ne ek choti si pyari duniya banayi hai kisi bohat khas ke liye."</p>
-                <p style="font-size: 1.1rem; color: #8A3B4E;">Ek aisi jagah jahan sirf sachai, pyari yaadein aur dil ki baatein hain.</p>
+                <p style="font-size: 1.1rem; color: #8A3B4E;">Ek aisi jagah jahan sirf Dosti, pyari yaadein aur dil ki baatein hain.</p>
             </div>
         </div>
     """, unsafe_allow_html=True)
@@ -383,7 +383,7 @@ elif st.session_state.page == "🌸 Dreamy Welcome":
 elif st.session_state.page == "🥺 I Know I Hurt You":
     st.markdown("""
         <div style="text-align: center; padding: 20px 0;">
-            <div style="font-size: 3rem;">🥺 🌧️ 🕊️</div>
+            <div style="font-size: 3rem;">🥺 ❤️‍🩹 🕊️</div>
             <h1 style="font-size: 3.8rem;">I Know You're Angry... 🥺</h1>
         </div>
     """, unsafe_allow_html=True)
@@ -393,7 +393,7 @@ elif st.session_state.page == "🥺 I Know I Hurt You":
             <p style="font-size: 1.3rem; line-height: 1.8;">
                 🌸 <b>Tumne mujh par bharosa kiya tha</b> apni private baat ke sath.<br><br>
                 🤍 <b>Tumne mujhe kaha tha ke yeh baat secret rakhoon</b> humare beech.<br><br>
-                💔 <b>Main ne bagair soche woh baat batadi</b> usi shakhs ko.<br><br>
+                💔 <b>Main ne bagair sochy woh baat batadi</b> usi shakhs ko.<br><br>
                 ❤️‍🩹 <b>Meri ghalti thi</b> aur main bilkul ghalat tha.<br><br>
                 🕊️ <b>Koi bahana nahi.</b> Koi safai nahi. Sirf dil se pachtawa hai.
             </p>
@@ -488,10 +488,10 @@ elif st.session_state.page == "💌 My Letter":
             <div class="glass-card" style="background: rgba(255, 245, 248, 0.95); border: 2px solid #E6B8B8;">
                 <h2 style="font-size: 2.5rem; margin-bottom: 20px;">Dear Ruhii,</h2>
                 <div class="letter-text">
-                    <p>Main apne pooray dil se tumse maafi maangna chahta hoon. Main ne tumhara bharosa toda jab tumne mujhe ek baat secret rakhne ko kaha tha, aur main ghalti kar betha.</p>
-                    <p>Yeh meri pehli ghalti nahi hai, aur main achi tarah samajhta hoon ke is baar tumhein kyun itna dukh hua hai. Tumhara naraz hona bilkul sahi hai, aur main koi bahana nahi banaunga.</p>
+                    <p>Main apne pooray dil se Awp sy maafi maangna chahta hoon. Main ne Awp ka bharosa toda jab Awp ny mujhe ek baat secret rakhne ko kaha tha, aur main ghalti kar betha.</p>
+                    <p>Yeh meri pehli ghalti nahi hai, aur main achi tarah samajhta hoon ke is baar Awp ko kyun itna dukh hua hai.Awp ka naraz hona bilkul sahi hai, aur main koi bahana nahi banaunga.</p>
                     <p>Main yeh nahi keh raha ke mujhe abhi maaf kar do. Sacha bharosa lafzon se nahi, balki badle hue amal se banta hai.</p>
-                    <p>Jitna waqt aur space tumhein chahiye, bilkul lo. Main humare rishte ki bohat qadar karta hoon.</p>
+                    <p>Jitna waqt aur space Awp ko chahiye, bilkul lo. Mein humari Dostii ki bohat qadar karta hoon.Aur mein Awp ko khona Nahi chahta.</p>
                                                                   <p>...اےدوست</p>
                             <p>دوستی تو ہمیشہ تم سے ہی رہے گی پھر چاہے تم</p>
                         <p>ناراض ہو،بے رخمی دکھاؤ،خاموش ہو جاؤ، یا بھول جاؤ</p>
@@ -515,7 +515,7 @@ elif st.session_state.page == "🌷 Take Your Time":
     st.markdown("""
         <div style="text-align: center; padding: 20px 0;">
             <div style="font-size: 3rem;">🏮 ✨ 🦋</div>
-            <h1 style="font-size: 3.8rem;">Take Your Time, Ruhii 🌷</h1>
+            <h1 style="font-size: 3.8rem;">Take Your Time, Ruhii g🌷</h1>
         </div>
     """, unsafe_allow_html=True)
 
@@ -544,7 +544,7 @@ elif st.session_state.page == "🌷 Take Your Time":
             log_click_event("Submitted Note Back to Hassan", "🌷 Take Your Time")
             log_user_note(user_note_input.strip())
             st.session_state.note_sent_confirm = True
-            st.success("Shukriya Ruhii! Aapka paigham mil gaya hai 🌸")
+            st.success("Shukriya Ruhii g! Aapka paigham mil gaya hai 🌸")
         else:
             st.warning("Pehle kuch likhein phir bhejen!")
 
