@@ -1,4 +1,4 @@
-import streamlit as st
+    import streamlit as st
 import time
 import json
 import os
@@ -130,6 +130,33 @@ st.markdown("""
         background: transparent !important;
     }
 
+    /* Live CSS Animated Sparkles & Petal Background Overlay */
+    @keyframes sparkling {
+        0%, 100% { opacity: 0.3; transform: scale(0.9); }
+        50% { opacity: 1; transform: scale(1.1); }
+    }
+    
+    @keyframes floatPetals {
+        0% { transform: translateY(0px) rotate(0deg); opacity: 0.8; }
+        50% { transform: translateY(-20px) rotate(10deg); opacity: 1; }
+        100% { transform: translateY(0px) rotate(0deg); opacity: 0.8; }
+    }
+
+    .sparkle-overlay {
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        pointer-events: none;
+        z-index: 1;
+        background-image: 
+            radial-gradient(2px 2px at 20px 30px, #FFB6C1, rgba(0,0,0,0)),
+            radial-gradient(2px 2px at 40px 70px, #FFF, rgba(0,0,0,0)),
+            radial-gradient(3px 3px at 80px 120px, #FFC0CB, rgba(0,0,0,0)),
+            radial-gradient(2px 2px at 150px 180px, #FFE4E1, rgba(0,0,0,0));
+        background-repeat: repeat;
+        background-size: 250px 250px;
+        animation: sparkling 4s infinite ease-in-out;
+    }
+
     /* Headings */
     h1, h2, h3 {
         font-family: 'Cormorant Garamond', serif !important;
@@ -195,6 +222,9 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+# Add Sparkle Background
+st.markdown('<div class="sparkle-overlay"></div>', unsafe_allow_html=True)
+
 # Initialize Session States
 if "page" not in st.session_state or st.session_state.page not in pages:
     st.session_state.page = pages[0]
@@ -238,7 +268,6 @@ if not st.session_state.view_admin_portal:
 # FULL DEDICATED SEPARATE PAGE — HASSAN'S SECRET VAULT
 # -------------------------------------------------------------
 if st.session_state.view_admin_portal and st.session_state.admin_authenticated:
-    # Live update duration for current page before viewing logs
     if "page_start_time" in st.session_state and "current_tracked_page" in st.session_state:
         current_dur = time.time() - st.session_state.page_start_time
         log_page_duration(st.session_state.current_tracked_page, current_dur)
@@ -365,7 +394,7 @@ elif st.session_state.page == "🥺 I Know I Hurt You":
                 🌸 <b>Tumne mujh par bharosa kiya tha</b> apni private baat ke sath.<br><br>
                 🤍 <b>Tumne mujhe kaha tha ke yeh baat secret rakhoon</b> humare beech.<br><br>
                 💔 <b>Main ne bagair soche woh baat batadi</b> usi shakhs ko.<br><br>
-                ❤️‍🩹<b>Meri ghalti thi</b> aur main bilkul ghalat tha.<br><br>
+                ❤️‍🩹 <b>Meri ghalti thi</b> aur main bilkul ghalat tha.<br><br>
                 🕊️ <b>Koi bahana nahi.</b> Koi safai nahi. Sirf dil se pachtawa hai.
             </p>
         </div>
@@ -463,9 +492,9 @@ elif st.session_state.page == "💌 My Letter":
                     <p>Yeh meri pehli ghalti nahi hai, aur main achi tarah samajhta hoon ke is baar tumhein kyun itna dukh hua hai. Tumhara naraz hona bilkul sahi hai, aur main koi bahana nahi banaunga.</p>
                     <p>Main yeh nahi keh raha ke mujhe abhi maaf kar do. Sacha bharosa lafzon se nahi, balki badle hue amal se banta hai.</p>
                     <p>Jitna waqt aur space tumhein chahiye, bilkul lo. Main humare rishte ki bohat qadar karta hoon.</p>
-     <p>...اےدوست</p>
-    <p>دوستی تو ہمیشہ تم سے ہی رہے گی پھر چاہے تم</p>
-    <p>ناراض ہو،بے رخمی دکھاؤ،خاموش ہو جاؤ، یا بھول جاؤ<</p>
+                                                                  <p>...اےدوست</p>
+                            <p>دوستی تو ہمیشہ تم سے ہی رہے گی پھر چاہے تم</p>
+                        <p>ناراض ہو،بے رخمی دکھاؤ،خاموش ہو جاؤ، یا بھول جاؤ</p>
                 </div>
                 <br>
                 <p class="handwriting" style="text-align: right;">— Hassan 🤍</p>
@@ -508,19 +537,16 @@ elif st.session_state.page == "🌷 Take Your Time":
             st.balloons()
 
     # Message Form
-    st.markdown("### 💌 Hassan Ko Koi Paigham Bhejo ")
+    st.markdown("### 💌 Hassan Ko Koi Paigham Bhejo (Aapki Marzi)")
     user_note_input = st.text_area("Apna paigham ya baat yahan likhein...", placeholder="Yahan likhein...", key="ruhii_note_area")
     if st.button("Hassan Ko Paigham Bhejo 🤍", key="btn_submit_ruhii_note"):
         if user_note_input.strip():
             log_click_event("Submitted Note Back to Hassan", "🌷 Take Your Time")
             log_user_note(user_note_input.strip())
             st.session_state.note_sent_confirm = True
-            st.success("Shukriya Ruhii! Aapka paigham Hassan tak pohench gaya hai 🤍")
+            st.success("Shukriya Ruhii! Aapka paigham mil gaya hai 🌸")
         else:
             st.warning("Pehle kuch likhein phir bhejen!")
-
-    if st.session_state.get("note_sent_confirm", False):
-        st.info("Aapka message Hassan ke secret vault mein mehfooz hai 🤍")
 
     if st.session_state.wish_sent:
         st.markdown("""
