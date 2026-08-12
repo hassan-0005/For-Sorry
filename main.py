@@ -463,9 +463,9 @@ elif st.session_state.page == "💌 My Letter":
                     <p>Yeh meri pehli ghalti nahi hai, aur main achi tarah samajhta hoon ke is baar tumhein kyun itna dukh hua hai. Tumhara naraz hona bilkul sahi hai, aur main koi bahana nahi banaunga.</p>
                     <p>Main yeh nahi keh raha ke mujhe abhi maaf kar do. Sacha bharosa lafzon se nahi, balki badle hue amal se banta hai.</p>
                     <p>Jitna waqt aur space tumhein chahiye, bilkul lo. Main humare rishte ki bohat qadar karta hoon.</p>
-                     <p>اےدوست!!!
-دوستی تو ہمیشہ تم سے ہی رہے گی پھر چاہے تم
-ناراض ہو،بے رخمی دکھاؤ،خاموش ہو جاؤ، یا بھول جاؤ</p>
+                                                                 <p>اےدوست...</p>
+                            <p>دوستی تو ہمیشہ تم سے ہی رہے گی پھر چاہے تم</p>
+                        <p>ناراض ہو،بے رخمی دکھاؤ،خاموش ہو جاؤ، یا بھول جاؤ<</p>
                 </div>
                 <br>
                 <p class="handwriting" style="text-align: right;">— Hassan 🤍</p>
