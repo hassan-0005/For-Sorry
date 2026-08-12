@@ -1,169 +1,440 @@
 import streamlit as st
-import random
+import time
+import json
+import os
+import datetime
 
-st.set_page_config(page_title="For Ruhii 🌸", page_icon="🌸", layout="wide", initial_sidebar_state="collapsed")
+# -------------------------------------------------------------
+# PERSISTENT ANALYTICS LOGGING SYSTEM (FOR HASSAN ONLY)
+# -------------------------------------------------------------
+LOG_FILE = "ruhii_analytics_log.json"
 
-PAGES = ["welcome", "hurt", "friendship", "letter", "wait"]
+def load_logs():
+    if os.path.exists(LOG_FILE):
+        try:
+            with open(LOG_FILE, "r") as f:
+                return json.load(f)
+        except Exception:
+            return {"clicks": [], "page_durations": {}, "notes": []}
+    return {"clicks": [], "page_durations": {}, "notes": []}
 
-if "page" not in st.session_state or st.session_state.page not in PAGES:
-    st.session_state.page = "welcome"
-if "letter_open" not in st.session_state:
-    st.session_state.letter_open = False
-if "wish_sent" not in st.session_state:
-    st.session_state.wish_sent = False
+def save_logs(data):
+    try:
+        with open(LOG_FILE, "w") as f:
+            json.dump(data, f, indent=2)
+    except Exception:
+        pass
 
-def go_to(page):
-    st.session_state.page = page if page in PAGES else "welcome"
+def log_click_event(button_name, page_name):
+    logs = load_logs()
+    now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    logs["clicks"].append({
+        "time": now_str,
+        "button": button_name,
+        "page": page_name
+    })
+    save_logs(logs)
 
-def floating_layer(items, count=18):
-    spans = []
-    for _ in range(count):
-        e = random.choice(items)
-        spans.append(
-            f'<span class="floaty" style="left:{random.uniform(2,98):.1f}vw;'
-            f'animation-delay:{random.uniform(0,10):.1f}s;'
-            f'animation-duration:{random.uniform(10,20):.1f}s;'
-            f'font-size:{random.uniform(14,28):.1f}px">{e}</span>'
-        )
-    st.markdown('<div class="floaty-wrap">' + ''.join(spans) + '</div>', unsafe_allow_html=True)
+def log_page_duration(page_name, duration_seconds):
+    if duration_seconds <= 0.5:
+        return
+    logs = load_logs()
+    if page_name not in logs["page_durations"]:
+        logs["page_durations"][page_name] = 0.0
+    logs["page_durations"][page_name] += round(duration_seconds, 1)
+    save_logs(logs)
 
+def log_user_note(note_text):
+    logs = load_logs()
+    now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    logs["notes"].append({
+        "time": now_str,
+        "text": note_text
+    })
+    save_logs(logs)
+
+def clear_all_analytics():
+    save_logs({"clicks": [], "page_durations": {}, "notes": []})
+
+# Defined Pages List
+pages = [
+    "🌸 Dreamy Welcome",
+    "🥺 I Know I Hurt You",
+    "💗 Our Friendship",
+    "💌 My Letter",
+    "🌷 Take Your Time"
+]
+
+# Track time spent on page transition
+def record_page_transition(new_page):
+    if new_page not in pages:
+        new_page = pages[0]
+        
+    old_page = st.session_state.get("current_tracked_page", None)
+    start_time = st.session_state.get("page_start_time", None)
+    
+    if old_page and start_time and old_page in pages:
+        elapsed = time.time() - start_time
+        log_page_duration(old_page, elapsed)
+        
+    st.session_state.current_tracked_page = new_page
+    st.session_state.page_start_time = time.time()
+    st.session_state.page = new_page
+
+# Set Page Config for Streamlit (Sidebar collapsed & hidden)
+st.set_page_config(
+    page_title="For Ruhii 🌸 | A Magical Apology",
+    page_icon="🌸",
+    layout="wide",
+    initial_sidebar_state="collapsed"
+)
+
+# Custom CSS for Dreamy Princess Light-Pink Aesthetics
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Dancing+Script:wght@500;600;700&family=Poppins:wght@300;400;500;600&display=swap');
-*{box-sizing:border-box}
-html,body{overflow-x:hidden}
-#MainMenu,header,footer{visibility:hidden}
-.stApp{
- background:radial-gradient(circle at 15% 15%,rgba(255,255,255,.7),transparent 25%),
- radial-gradient(circle at 85% 20%,rgba(255,182,213,.45),transparent 28%),
- linear-gradient(160deg,#fff0f5 0%,#ffe4ec 35%,#ffd9e8 65%,#f6c9e0 100%);
- background-size:300% 300%;background-attachment:fixed;animation:bg 18s ease infinite;overflow-x:hidden
-}
-@keyframes bg{0%,100%{background-position:0 50%}50%{background-position:100% 50%}}
-.block-container{max-width:1050px;padding:1rem .9rem 3rem!important;position:relative;z-index:2}
-.floaty-wrap{position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:1}
-.floaty{position:absolute;top:110vh;opacity:.7;animation:up 15s ease-in-out infinite;filter:drop-shadow(0 0 6px rgba(255,143,171,.45))}
-@keyframes up{0%{transform:translate(0,0) rotate(0);opacity:0}10%{opacity:.75}50%{transform:translate(20px,-55vh) rotate(12deg)}100%{transform:translate(-15px,-125vh) rotate(-10deg);opacity:0}}
-.dream-title{font-family:'Playfair Display',serif;text-align:center;color:#b51f61;line-height:1.15;margin:25px auto 10px;text-shadow:0 4px 18px rgba(181,31,97,.15);animation:show 1.1s ease both}
-.script-quote{font-family:'Dancing Script',cursive;text-align:center;color:#8d3154;line-height:1.6;animation:show 1.4s ease both}
-.soft-para,.final-note{color:#7a2e46;text-align:center;line-height:1.9;max-width:760px;margin:auto}
-@keyframes show{from{opacity:0;transform:translateY(25px)}to{opacity:1;transform:translateY(0)}}
-.glass-card{background:rgba(255,255,255,.48);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.7);border-radius:26px;padding:28px 22px;text-align:center;box-shadow:0 8px 32px rgba(214,51,108,.15);transition:.4s;animation:show 1.3s ease both;margin-bottom:20px}
-.glass-card:hover{transform:translateY(-8px) scale(1.02);box-shadow:0 16px 40px rgba(214,51,108,.28)}
-.glass-card h3{font-family:'Playfair Display',serif;color:#c2185b}
-.glass-card p{color:#8a3a55;line-height:1.7}
-div.stButton>button{background:linear-gradient(135deg,#ffb6c1,#ff8fab,#e75480);color:#fff;font-weight:600;border:2px solid rgba(255,215,0,.35);border-radius:40px;min-height:48px;padding:12px 24px;box-shadow:0 6px 20px rgba(231,84,128,.35);transition:.35s}
-div.stButton>button:hover{transform:translateY(-4px) scale(1.02);box-shadow:0 0 25px rgba(255,182,213,.9),0 10px 25px rgba(231,84,128,.4);border-color:gold;color:#fff}
-.envelope-wrap{display:flex;justify-content:center;margin:30px auto;animation:show 1.6s ease both}
-.envelope{width:min(300px,78vw);height:200px;background:linear-gradient(135deg,#fff0f5,#ffe0eb);border-radius:14px;position:relative;box-shadow:0 15px 35px rgba(214,51,108,.25);border:2px solid #ffd1dc}
-.envelope:before{content:"";position:absolute;top:0;left:0;border-left:150px solid transparent;border-right:150px solid transparent;border-top:110px solid #ffc2d6}
-.seal{position:absolute;top:78px;left:50%;transform:translateX(-50%);width:50px;height:50px;background:radial-gradient(circle at 35% 35%,#ff8fab,#c2185b);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;animation:glow 2.4s infinite;z-index:2}
-@keyframes glow{0%,100%{box-shadow:0 0 10px rgba(255,143,171,.6)}50%{box-shadow:0 0 25px rgba(255,143,171,1)}}
-.letter-paper{background:repeating-linear-gradient(#fff6f9,#fff6f9 34px,#ffe3ec 35px);border-radius:18px;padding:45px 40px;max-width:700px;width:100%;margin:20px auto;box-shadow:0 12px 35px rgba(214,51,108,.2);border:1px solid #ffd1dc;animation:show 1.4s ease}
-.letter-paper p{font-family:'Dancing Script',cursive;font-size:1.5em;color:#7a2e46;line-height:1.8}
-.reveal-line{font-family:'Dancing Script',cursive;font-size:1.8em;text-align:center;color:#ad1457;opacity:0;animation:show 1.4s ease forwards;line-height:1.5}
-.d1{animation-delay:.2s}.d2{animation-delay:1.1s}.d3{animation-delay:2s}.d4{animation-delay:2.9s}
-@media(max-width:700px){
- .block-container{padding:.6rem .7rem 2rem!important}
- .dream-title{font-size:2.25rem!important;margin-top:18px}
- .script-quote{font-size:1.35rem!important}
- .soft-para,.final-note{font-size:.92rem;line-height:1.75;padding:0 8px}
- .glass-card{padding:22px 17px;border-radius:21px}
- .glass-card h3{font-size:1.15rem}.glass-card p{font-size:.88rem}
- .letter-paper{padding:28px 20px;border-radius:15px}
- .letter-paper p{font-size:1.25rem;line-height:1.65}
- .reveal-line{font-size:1.4rem;padding:0 8px}
- .envelope{height:170px}.envelope:before{border-left-width:39vw;border-right-width:39vw;border-top-width:95px}
- .seal{top:66px}.floaty{opacity:.55}
-}
+    @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Dancing+Script:wght@400..700&family=Quicksand:wght@300..700&display=swap');
+
+    /* Global Body styling */
+    .stApp {
+        background: linear-gradient(180deg, #FFF5F7 0%, #FFE4E8 50%, #FFF0F4 100%);
+        color: #5A3A42;
+        font-family: 'Quicksand', sans-serif;
+    }
+
+    /* Hide Streamlit Sidebar Completely & Header */
+    [data-testid="stSidebar"] {
+        display: none !important;
+    }
+    [data-testid="collapsedControl"] {
+        display: none !important;
+    }
+    header[data-testid="stHeader"] {
+        background: transparent !important;
+    }
+
+    /* Headings */
+    h1, h2, h3 {
+        font-family: 'Cormorant Garamond', serif !important;
+        color: #4A1525 !important;
+    }
+
+    /* Glassmorphism Panel */
+    .glass-card {
+        background: rgba(255, 240, 245, 0.75);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 182, 193, 0.6);
+        border-radius: 24px;
+        padding: 28px;
+        box-shadow: 0 12px 32px 0 rgba(230, 150, 170, 0.18);
+        margin-bottom: 20px;
+    }
+
+    .handwriting {
+        font-family: 'Dancing Script', cursive !important;
+        font-size: 2.2rem !important;
+        color: #9E2A4B !important;
+    }
+
+    .letter-text {
+        font-family: 'Caveat', cursive !important;
+        font-size: 1.8rem !important;
+        line-height: 1.5 !important;
+        color: #4A1525 !important;
+    }
+
+    /* Floating Heart Animation */
+    @keyframes float {
+        0% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-15px) rotate(5deg); }
+        100% { transform: translateY(0px) rotate(0deg); }
+    }
+
+    .floating-sticker {
+        display: inline-block;
+        animation: float 4s ease-in-out infinite;
+    }
+
+    /* Custom Streamlit Buttons */
+    .stButton>button {
+        background: linear-gradient(135deg, #FFB6C1 0%, #FFC0CB 50%, #FFB7C5 100%) !important;
+        color: #4A1525 !important;
+        font-family: 'Cormorant Garamond', serif !important;
+        font-weight: 700 !important;
+        font-size: 1.3rem !important;
+        border-radius: 50px !important;
+        border: 2px solid #E6B8B8 !important;
+        box-shadow: 0 6px 20px rgba(255, 150, 175, 0.4) !important;
+        padding: 12px 32px !important;
+        transition: all 0.3s ease !important;
+        width: 100% !important;
+    }
+
+    .stButton>button:hover {
+        transform: scale(1.03) translateY(-2px) !important;
+        box-shadow: 0 10px 28px rgba(255, 130, 160, 0.6) !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 
-def page_welcome():
-    floating_layer(["✨","💗","🌸","☁️","🎀"],20)
-    st.markdown("<h1 class='dream-title' style='font-size:3.2em'>Hey Ruhii... 🌸</h1>",unsafe_allow_html=True)
-    st.markdown("<p class='script-quote' style='font-size:1.6em'>\"I made a tiny little world for someone very special.\"</p>",unsafe_allow_html=True)
-    st.markdown("<div style='height:35px'></div>",unsafe_allow_html=True)
-    _,c,_=st.columns([1,1,1])
-    with c:
-        if st.button("Meri Choti Si Duniya Mein Aao ✨",use_container_width=True):
-            go_to("hurt");st.rerun()
-    st.markdown("<div style='height:55px'></div><p class='soft-para'>🌙 a soft glowing moon watches quietly over a world of pink clouds and glitter rain, waiting for you to step inside...</p>",unsafe_allow_html=True)
+# Initialize Session States
+if "page" not in st.session_state or st.session_state.page not in pages:
+    st.session_state.page = pages[0]
+if "letter_opened" not in st.session_state:
+    st.session_state.letter_opened = False
+if "wish_sent" not in st.session_state:
+    st.session_state.wish_sent = False
 
-def page_hurt():
-    floating_layer(["🌸","❤️","🥀","💮"],16)
-    st.markdown("<h1 class='dream-title' style='font-size:2.6em'>Mujhe Pata Hai Tum Naraz Ho... 🥺</h1>",unsafe_allow_html=True)
-    for cls,text in [("d1","You trusted me with something important. 🌷"),("d2","You asked me to keep it a secret."),("d3","And I told the same person you asked me not to."),("d4","I was wrong — and I'm not making any excuses for it.")]:
-        st.markdown(f"<p class='reveal-line {cls}'>{text}</p>",unsafe_allow_html=True)
-    st.markdown("<div style='height:35px'></div>",unsafe_allow_html=True)
-    _,c,_=st.columns([1,1,1])
-    with c:
-        if st.button("Hamari Kahani Mein Agay Chalo 🦋",use_container_width=True):
-            go_to("friendship");st.rerun()
+if "current_tracked_page" not in st.session_state:
+    st.session_state.current_tracked_page = st.session_state.page
+if "page_start_time" not in st.session_state:
+    st.session_state.page_start_time = time.time()
 
-def page_friendship():
-    floating_layer(["🦋","💗","✨","🌙"],16)
-    st.markdown("<h1 class='dream-title' style='font-size:2.6em'>Hamari Dosti 🦋</h1>",unsafe_allow_html=True)
-    memories=[("🌸","Pehli Yaad","The moment this friendship quietly began."),("💗","Sab Se Mazedaar Lamha","The one we still laugh about randomly."),("🦋","Ek Muskurahat","A tiny moment that stayed with me."),("🌙","Hamari Pasandida Baat","The talk that felt like it lasted forever.")]
-    cols=st.columns(2)
-    for i,(e,t,d) in enumerate(memories):
-        with cols[i%2]:
-            st.markdown(f"<div class='glass-card'><h3>{e} {t}</h3><p>{d}</p></div>",unsafe_allow_html=True)
-    st.markdown("<p class='script-quote' style='font-size:1.9em'>\"Some people slowly become home.\"</p>",unsafe_allow_html=True)
-    _,c,_=st.columns([1,1,1])
-    with c:
-        if st.button("Meri Chitthi Parho 💌",use_container_width=True):
-            go_to("letter");st.rerun()
+# -------------------------------------------------------------
+# TOP HEADER WITH DISCREET SECRET PORTAL (TINY HEART CORNER)
+# -------------------------------------------------------------
+top_col1, top_col2 = st.columns([12, 1])
+with top_col2:
+    with st.expander("🤍"):
+        secret_pass = st.text_input("Key", type="password", key="admin_pwd")
+        if secret_pass == "hassan786" or secret_pass == "hassan123":
+            st.success("Welcome Hassan 🤍")
+            
+            # Update duration live
+            if "page_start_time" in st.session_state and "current_tracked_page" in st.session_state:
+                current_dur = time.time() - st.session_state.page_start_time
+                log_page_duration(st.session_state.current_tracked_page, current_dur)
+                st.session_state.page_start_time = time.time()
+                
+            logs = load_logs()
+            
+            st.markdown("#### ⏱️ Time Spent on Pages")
+            durations = logs.get("page_durations", {})
+            if durations:
+                for page_name, seconds in durations.items():
+                    mins = round(seconds / 60, 2)
+                    st.write(f"• **{page_name}**: `{seconds}s` (~{mins}m)")
+            else:
+                st.caption("No data yet.")
+                
+            st.markdown("#### 🖱️ Clicks Log")
+            clicks = logs.get("clicks", [])
+            if clicks:
+                for c in reversed(clicks):
+                    st.caption(f"[{c['time']}] *{c['page']}* -> **{c['button']}**")
+            else:
+                st.caption("No clicks yet.")
+                
+            st.markdown("#### ✉️ Notes From Ruhii")
+            notes = logs.get("notes", [])
+            if notes:
+                for n in reversed(notes):
+                    st.write(f"💌 **[{n['time']}]**: {n['text']}")
+            else:
+                st.caption("No notes yet.")
+                
+            if st.button("🗑️ Reset All"):
+                clear_all_analytics()
+                st.success("Reset!")
+                st.rerun()
 
-def page_letter():
-    floating_layer(["💌","🌹","✨","🦋"],14)
-    st.markdown("<h1 class='dream-title' style='font-size:2.6em'>Meri Chitthi 💌</h1>",unsafe_allow_html=True)
-    if not st.session_state.letter_open:
-        st.markdown("<div class='envelope-wrap'><div class='envelope'><div class='seal'>🌹</div></div></div>",unsafe_allow_html=True)
-        _,c,_=st.columns([1,1,1])
-        with c:
-            if st.button("Chitthi Kholo 💌",use_container_width=True):
-                st.session_state.letter_open=True;st.rerun()
+# -------------------------------------------------------------
+# PAGE 1 — DREAMY WELCOME
+# -------------------------------------------------------------
+if st.session_state.page == "🌸 Dreamy Welcome":
+    st.markdown("""
+        <div style="text-align: center; padding: 40px 0;">
+            <div class="floating-sticker" style="font-size: 4rem;">🌸 ✨ 🌙</div>
+            <h1 style="font-size: 4.5rem; margin-bottom: 10px;">Hey Ruhii... 🌸</h1>
+            <div class="glass-card" style="max-width: 700px; margin: 0 auto 30px auto;">
+                <p class="handwriting">"Main ne ek choti si pyari duniya banayi hai kisi bohat khas ke liye."</p>
+                <p style="font-size: 1.1rem; color: #8A3B4E;">Ek aisi jagah jahan sirf sachai, pyari yaadein aur dil ki baatein hain.</p>
+            </div>
+        </div>
+    """, unsafe_allow_html=True)
+
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        if st.button("Enter My World ✨"):
+            log_click_event("Button: Enter My World ✨", "🌸 Dreamy Welcome")
+            record_page_transition("🥺 I Know I Hurt You")
+            st.rerun()
+
+# -------------------------------------------------------------
+# PAGE 2 — I KNOW I HURT YOU
+# -------------------------------------------------------------
+elif st.session_state.page == "🥺 I Know I Hurt You":
+    st.markdown("""
+        <div style="text-align: center; padding: 20px 0;">
+            <div style="font-size: 3rem;">🥺 🌧️ 🕊️</div>
+            <h1 style="font-size: 3.8rem;">I Know You're Angry... 🥺</h1>
+        </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("""
+        <div class="glass-card">
+            <p style="font-size: 1.3rem; line-height: 1.8;">
+                🌸 <b>Tumne mujh par bharosa kiya tha</b> apni private baat ke sath.<br><br>
+                🤍 <b>Tumne mujhe kaha tha ke yeh baat secret rakhoon</b> humare beech.<br><br>
+                💔 <b>Main ne bagair soche woh baat batadi</b> usi shakhs ko.<br><br>
+                🌧️ <b>Meri ghalti thi</b> aur main bilkul ghalat tha.<br><br>
+                🕊️ <b>Koi bahana nahi.</b> Koi safai nahi. Sirf dil se pachtawa hai.
+            </p>
+        </div>
+    """, unsafe_allow_html=True)
+
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        if st.button("See Our Friendship Memories 💗"):
+            log_click_event("Button: See Our Friendship Memories 💗", "🥺 I Know I Hurt You")
+            record_page_transition("💗 Our Friendship")
+            st.rerun()
+
+# -------------------------------------------------------------
+# PAGE 3 — OUR FRIENDSHIP
+# -------------------------------------------------------------
+elif st.session_state.page == "💗 Our Friendship":
+    st.markdown("""
+        <div style="text-align: center; padding: 20px 0;">
+            <div style="font-size: 3rem;">💖 🦋 🌙</div>
+            <h1 style="font-size: 3.8rem;">Our Friendship 💗</h1>
+            <p style="font-size: 1.2rem; color: #7A2B3E;">Har muskurahat, har baat aur har lamha mere dil ke bohat kareeb hai.</p>
+        </div>
+    """, unsafe_allow_html=True)
+
+    col1, col2 = st.columns(2)
+    with col1:
+        st.markdown("""
+            <div class="glass-card">
+                <h3>🌸 First Memory</h3>
+                <p><b>Jahan se shuruat hui:</b> Jab humari baatein shuru hui aur pata chala ke humara comfort zone bilkul same hai.</p>
+            </div>
+            <div class="glass-card">
+                <h3>🦋 A Smile I Still Remember</h3>
+                <p><b>Khusboo jaisi warmth:</b> Tumhari woh sachi muskurahat jab sab kuch acha lagta tha.</p>
+            </div>
+        """, unsafe_allow_html=True)
+
+    with col2:
+        st.markdown("""
+            <div class="glass-card">
+                <h3>💗 The Funniest Moment</h3>
+                <p><b>Be-ihsiyaas hansi:</b> Woh inside joke jis par hum hase bina nahi reh sakte the!</p>
+            </div>
+            <div class="glass-card">
+                <h3>🌙 Our Favorite Conversation</h3>
+                <p><b>Raat ki baatein:</b> Woh guftagu jahan waqt ruk jata tha aur hum zindagi par baatein karte the.</p>
+            </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("""
+        <div class="glass-card" style="text-align: center;">
+            <p class="handwriting">"Kuch log ahista ahista ghar jaisa sukoon ban jaate hain."</p>
+        </div>
+    """, unsafe_allow_html=True)
+
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        if st.button("Read My Letter 💌"):
+            log_click_event("Button: Read My Letter 💌", "💗 Our Friendship")
+            record_page_transition("💌 My Letter")
+            st.rerun()
+
+# -------------------------------------------------------------
+# PAGE 4 — MY LETTER
+# -------------------------------------------------------------
+elif st.session_state.page == "💌 My Letter":
+    st.markdown("""
+        <div style="text-align: center; padding: 20px 0;">
+            <div style="font-size: 3rem;">🎀 🌹 ✉️</div>
+            <h1 style="font-size: 3.8rem;">My Letter To You 💌</h1>
+        </div>
+    """, unsafe_allow_html=True)
+
+    if not st.session_state.letter_opened:
+        st.markdown("""
+            <div class="glass-card" style="text-align: center; padding: 50px;">
+                <div style="font-size: 4rem;">🎀 🪙 🌹</div>
+                <h2 style="font-size: 2.5rem;">To: Dearest Ruhii 🌸</h2>
+                <p style="font-size: 1.1rem; color: #8A3B4E;">Khas Mohabbat Aur Sachai Ke Sath Sealed</p>
+            </div>
+        """, unsafe_allow_html=True)
+
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2:
+            if st.button("Open the Letter 💌"):
+                log_click_event("Button: Open the Letter 💌", "💌 My Letter")
+                st.session_state.letter_opened = True
+                st.rerun()
     else:
-        st.markdown("""<div class="letter-paper">
-        <p>Dear Ruhii,</p>
-        <p>I broke your trust, and I know that's not something small.</p>
-        <p>This isn't the first time I've made a mistake — and I understand why this time feels different, why it hurts more, why it's harder to just let go.</p>
-        <p>I'm not asking you to forgive me right now. I don't expect that, and I don't think I deserve it yet.</p>
-        <p>I just want the chance to earn your trust back — slowly, honestly, through actions and not words.</p>
-        <p>Take all the time you need. I'll still be here.</p>
-        <p>With love,<br>Hassan 🤍</p>
-        </div>""",unsafe_allow_html=True)
-        _,c,_=st.columns([1,1,1])
-        with c:
-            if st.button("Apna Waqt Lo 🌷",use_container_width=True):
-                go_to("wait");st.rerun()
+        st.markdown("""
+            <div class="glass-card" style="background: rgba(255, 245, 248, 0.95); border: 2px solid #E6B8B8;">
+                <h2 style="font-size: 2.5rem; margin-bottom: 20px;">Dear Ruhii,</h2>
+                <div class="letter-text">
+                    <p>Main apne pooray dil se tumse maafi maangna chahta hoon. Main ne tumhara bharosa toda jab tumne mujhe ek baat secret rakhne ko kaha tha, aur main ghalti kar betha.</p>
+                    <p>Yeh meri pehli ghalti nahi hai, aur main achi tarah samajhta hoon ke is baar tumhein kyun itna dukh hua hai. Tumhara naraz hona bilkul sahi hai, aur main koi bahana nahi banaunga.</p>
+                    <p>Main yeh nahi keh raha ke mujhe abhi maaf kar do. Sacha bharosa lafzon se nahi, balki badle hue amal se banta hai.</p>
+                    <p>Jitna waqt aur space tumhein chahiye, bilkul lo. Main humare rishte ki bohat qadar karta hoon.</p>
+                </div>
+                <br>
+                <p class="handwriting" style="text-align: right;">— Hassan 🤍</p>
+            </div>
+        """, unsafe_allow_html=True)
 
-def page_wait():
-    floating_layer(["🌸","🏮","✨","🦋","🕊️"],18)
-    st.markdown("<h1 class='dream-title' style='font-size:2.8em'>Apna Waqt Lo, Ruhii 🌷</h1>",unsafe_allow_html=True)
-    for cls,text in [("d1","Koi pressure nahi."),("d2","Koi umeed nahi."),("d3","Bas dil se ek sorry."),("d4","— Hassan 🤍")]:
-        st.markdown(f"<p class='reveal-line {cls}'>{text}</p>",unsafe_allow_html=True)
-    _,c,_=st.columns([1,1,1])
-    with c:
-        if st.button("Apni Dua Bhejo ✨",use_container_width=True):
-            st.session_state.wish_sent=True;st.rerun()
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2:
+            if st.button("Go to Final Page 🌷"):
+                log_click_event("Button: Go to Final Page 🌷", "💌 My Letter")
+                record_page_transition("🌷 Take Your Time")
+                st.rerun()
+
+# -------------------------------------------------------------
+# PAGE 5 — TAKE YOUR TIME
+# -------------------------------------------------------------
+elif st.session_state.page == "🌷 Take Your Time":
+    st.markdown("""
+        <div style="text-align: center; padding: 20px 0;">
+            <div style="font-size: 3rem;">🏮 ✨ 🦋</div>
+            <h1 style="font-size: 3.8rem;">Take Your Time, Ruhii 🌷</h1>
+        </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("""
+        <div class="glass-card" style="text-align: center; padding: 40px;">
+            <p style="font-size: 2.2rem; font-family: 'Cormorant Garamond', serif;">Koi dabaao nahi.</p>
+            <p style="font-size: 2.2rem; font-family: 'Cormorant Garamond', serif;">Koi majboori nahi.</p>
+            <p style="font-size: 2.5rem; font-family: 'Cormorant Garamond', serif; font-weight: bold; color: #9E2A4B;">Sirf ek sachi aur dil se Maafi.</p>
+            <br>
+            <p class="handwriting">— Hassan 🤍</p>
+        </div>
+    """, unsafe_allow_html=True)
+
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        if st.button("Send My Wish ✨"):
+            log_click_event("Button: Send My Wish ✨", "🌷 Take Your Time")
+            st.session_state.wish_sent = True
+            st.balloons()
+
+    # Message Form
+    st.markdown("### 💌 Hassan Ko Koi Paigham Bhejo (Optional)")
+    with st.form(key="ruhii_note_form"):
+        user_note_input = st.text_area("Apna paigham ya baat yahan likhein...", placeholder="Yahan likhein...")
+        submit_note = st.form_submit_button("Hassan Ko Paigham Bhejo 🤍")
+        if submit_note and user_note_input.strip():
+            log_click_event("Submitted Note Back to Hassan", "🌷 Take Your Time")
+            log_user_note(user_note_input.strip())
+            st.session_state.note_sent_confirm = True
+
+    if st.session_state.get("note_sent_confirm", False):
+        st.success("Shukriya Ruhii! Aapka paigham Hassan tak pohench gaya hai 🤍")
+
     if st.session_state.wish_sent:
-        floating_layer(["❤️","✨","💖"],20)
-        st.markdown("<p class='script-quote' style='font-size:1.6em'>\"I hope one day this hurt becomes just one small chapter of a friendship that grew stronger.\"</p>",unsafe_allow_html=True)
-    st.markdown("<p class='final-note'>Whatever you decide, I hope you know that this apology was meant sincerely. 🤍</p>",unsafe_allow_html=True)
-    st.markdown("<div style='text-align:center;padding:30px;color:rgba(122,46,70,.55);font-size:11px;letter-spacing:2px'>DIL SE BANAYA HAI · SIRF RUHII KE LIYE</div>",unsafe_allow_html=True)
-
-def main():
-    if st.session_state.page not in PAGES:
-        st.session_state.page="welcome"
-    {
-        "welcome":page_welcome,
-        "hurt":page_hurt,
-        "friendship":page_friendship,
-        "letter":page_letter,
-        "wait":page_wait,
-    }[st.session_state.page]()
-
-if __name__=="__main__":
-    main()
+        st.markdown("""
+            <div class="glass-card" style="text-align: center; margin-top: 20px; border: 2px solid #FFB6C1;">
+                <div style="font-size: 2.5rem;">🌸 💖 ✨</div>
+                <p class="handwriting">
+                    "Mujhe umeed hai ek din yeh dukh humari dosti ka ek chota sa hissa ban kar reh jayega jo pehle se zyada pakki ho gayi."
+                </p>
+            </div>
+        """, unsafe_allow_html=True)
